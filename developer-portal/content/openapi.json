@@ -1,0 +1,3937 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Emithran Manufacturing Intelligence API",
+  "description": "REST API over the Emithran manufacturing taxonomy, materials, machines, processes, prices and market data.",
+  "version": "2.0.0"
+ },
+ "servers": [
+  {
+   "url": "/",
+   "description": "This deployment"
+  }
+ ],
+ "paths": {
+  "/api/v2/oauth2/token": {
+   "post": {
+    "summary": "Get Access Token",
+    "description": "OAuth 2.0 client-credentials grant (RFC 6749 \u00a74.4). Send `application/x-www-form-urlencoded` with `grant_type=client_credentials`, `client_id`, `client_secret` (or HTTP Basic) and an optional space-separated `scope`. Returns a bearer token valid for the client's TTL (default 3600 s).",
+    "operationId": "token_api_v2_oauth2_token_post",
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_token_api_v2_oauth2_token_post"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "General",
+    "x-resource": "Authentication",
+    "x-scopes": [],
+    "x-auth": "client"
+   }
+  },
+  "/api/v2/meta/scopes": {
+   "get": {
+    "summary": "List Scopes",
+    "description": "Lists OAuth scopes and what they grant. No authentication required.",
+    "operationId": "scopes_api_v2_meta_scopes_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "General",
+    "x-resource": "Authentication",
+    "x-scopes": []
+   }
+  },
+  "/api/v2/meta/errors": {
+   "get": {
+    "summary": "List Error Types",
+    "description": "Catalogue of `errorName` values the API can return, with their `errorCode`. No authentication required.",
+    "operationId": "errors_api_v2_meta_errors_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "General",
+    "x-resource": "Errors",
+    "x-scopes": []
+   }
+  },
+  "/api/v2/orchestration/sources": {
+   "get": {
+    "summary": "List Sources",
+    "description": "Lists registered data sources with licence, verification status, schedule and freshness.",
+    "operationId": "list_sources_api_v2_orchestration_sources_get",
+    "parameters": [
+     {
+      "name": "pageSize",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The page size to use for the endpoint (1\u20131000, default 100).",
+       "title": "Pagesize"
+      },
+      "description": "The page size to use for the endpoint (1\u20131000, default 100)."
+     },
+     {
+      "name": "pageToken",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Omit on the first request; then pass `nextPageToken` from the previous response.",
+       "title": "Pagetoken"
+      },
+      "description": "Omit on the first request; then pass `nextPageToken` from the previous response."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Orchestration",
+    "x-resource": "Sources",
+    "x-scopes": [
+     "api:orchestration-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:orchestration-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/orchestration/sources/{source}": {
+   "get": {
+    "summary": "Get Source",
+    "description": "Gets one source by slug or RID.",
+    "operationId": "get_source_api_v2_orchestration_sources__source__get",
+    "parameters": [
+     {
+      "name": "source",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "examples": [
+        "frankfurter-fx"
+       ],
+       "title": "Source"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Orchestration",
+    "x-resource": "Sources",
+    "x-scopes": [
+     "api:orchestration-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:orchestration-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/orchestration/builds": {
+   "get": {
+    "summary": "List Builds",
+    "description": "Lists builds (crawl jobs), newest first. Status: QUEUED, STARTING, RUNNING, SUCCEEDED, PARTIAL, FAILED, CANCELLED.",
+    "operationId": "list_builds_api_v2_orchestration_builds_get",
+    "parameters": [
+     {
+      "name": "source",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Source"
+      }
+     },
+     {
+      "name": "pageSize",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The page size to use for the endpoint (1\u20131000, default 100).",
+       "title": "Pagesize"
+      },
+      "description": "The page size to use for the endpoint (1\u20131000, default 100)."
+     },
+     {
+      "name": "pageToken",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Omit on the first request; then pass `nextPageToken` from the previous response.",
+       "title": "Pagetoken"
+      },
+      "description": "Omit on the first request; then pass `nextPageToken` from the previous response."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Orchestration",
+    "x-resource": "Builds",
+    "x-scopes": [
+     "api:orchestration-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:orchestration-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   },
+   "post": {
+    "summary": "Create Build",
+    "description": "Queues a crawl of a source. Refused for planned, blocked, disabled or already-running sources. The worker picks it up within seconds; poll Get Build for progress.",
+    "operationId": "create_build_api_v2_orchestration_builds_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BuildIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Orchestration",
+    "x-resource": "Builds",
+    "x-scopes": [
+     "api:orchestration-write"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:orchestration-write"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/orchestration/builds/{buildRid}": {
+   "get": {
+    "summary": "Get Build",
+    "description": "Gets a build with live statistics (URLs discovered, pages fetched, items stored, failures).",
+    "operationId": "get_build_api_v2_orchestration_builds__buildRid__get",
+    "parameters": [
+     {
+      "name": "buildRid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "examples": [
+        "ri.emithran.main.build.12"
+       ],
+       "title": "Buildrid"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Orchestration",
+    "x-resource": "Builds",
+    "x-scopes": [
+     "api:orchestration-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:orchestration-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/orchestration/builds/{buildRid}/cancel": {
+   "post": {
+    "summary": "Cancel Build",
+    "description": "Requests cancellation. Queued builds stop immediately; running builds close within a few seconds.",
+    "operationId": "cancel_build_api_v2_orchestration_builds__buildRid__cancel_post",
+    "parameters": [
+     {
+      "name": "buildRid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Buildrid"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Orchestration",
+    "x-resource": "Builds",
+    "x-scopes": [
+     "api:orchestration-write"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:orchestration-write"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/admin/clients": {
+   "get": {
+    "summary": "List Clients",
+    "description": "Lists OAuth2 clients.",
+    "operationId": "list_clients_api_v2_admin_clients_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "Clients",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   },
+   "post": {
+    "summary": "Create Client",
+    "description": "Creates an OAuth2 client. **`clientSecret` is returned only once** \u2014 store it securely.",
+    "operationId": "create_client_api_v2_admin_clients_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClientIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "Clients",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/admin/clients/{clientId}/rotateSecret": {
+   "post": {
+    "summary": "Rotate Client Secret",
+    "description": "Issues a new secret and invalidates tokens issued before the rotation. The new secret is returned once.",
+    "operationId": "rotate_api_v2_admin_clients__clientId__rotateSecret_post",
+    "parameters": [
+     {
+      "name": "clientId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Clientid"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "Clients",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/admin/clients/{clientId}/revoke": {
+   "post": {
+    "summary": "Revoke Client",
+    "description": "Revokes the client; all of its tokens stop working immediately.",
+    "operationId": "revoke_client_api_v2_admin_clients__clientId__revoke_post",
+    "parameters": [
+     {
+      "name": "clientId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Clientid"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "Clients",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/admin/apiKeys": {
+   "get": {
+    "summary": "List API Keys",
+    "description": "Lists API keys (never the secret).",
+    "operationId": "list_keys_api_v2_admin_apiKeys_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "API Keys",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   },
+   "post": {
+    "summary": "Create API Key",
+    "description": "Creates an API key. **`apiKey` is returned only once.** Use it as `Authorization: Bearer emk_\u2026`.",
+    "operationId": "create_key_api_v2_admin_apiKeys_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/KeyIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "API Keys",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/admin/apiKeys/{prefix}/revoke": {
+   "post": {
+    "summary": "Revoke API Key",
+    "description": "Revokes the key immediately.",
+    "operationId": "revoke_key_api_v2_admin_apiKeys__prefix__revoke_post",
+    "parameters": [
+     {
+      "name": "prefix",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Prefix"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "API Keys",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/admin/usage": {
+   "get": {
+    "summary": "Get Usage",
+    "description": "Request counts, error rate and latency (avg, p95) for the last `days`, per day, per endpoint and per principal.",
+    "operationId": "usage_api_v2_admin_usage_get",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 90,
+       "minimum": 1,
+       "default": 7,
+       "title": "Days"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "Usage",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/admin/usage/requests": {
+   "get": {
+    "summary": "List Recent Requests",
+    "description": "Most recent API requests with status, latency and `errorInstanceId` for failed calls.",
+    "operationId": "recent_api_v2_admin_usage_requests_get",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 1000,
+       "minimum": 1,
+       "default": 100,
+       "title": "Limit"
+      }
+     },
+     {
+      "name": "errorsOnly",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "default": false,
+       "title": "Errorsonly"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Admin",
+    "x-resource": "Usage",
+    "x-scopes": [
+     "api:admin"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:admin"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies": {
+   "get": {
+    "summary": "List Ontologies",
+    "description": "Lists the ontologies visible to the caller. The platform exposes a single ontology, `manufacturing`, that models every dataset imported from the memory/ folder plus crawled data.",
+    "operationId": "list_ontologies_api_v2_ontologies_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Ontologies",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}": {
+   "get": {
+    "summary": "Get Ontology",
+    "description": "Gets a specific ontology with the given API name or RID.",
+    "operationId": "get_ontology_api_v2_ontologies__ontology__get",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Ontologies",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objectTypes": {
+   "get": {
+    "summary": "List Object Types",
+    "description": "Lists the object types in the ontology with their properties, data types, primary key and links.",
+    "operationId": "list_object_types_api_v2_ontologies__ontology__objectTypes_get",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "pageSize",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The page size to use for the endpoint (1\u20131000, default 100).",
+       "title": "Pagesize"
+      },
+      "description": "The page size to use for the endpoint (1\u20131000, default 100)."
+     },
+     {
+      "name": "pageToken",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Omit on the first request; then pass `nextPageToken` from the previous response.",
+       "title": "Pagetoken"
+      },
+      "description": "Omit on the first request; then pass `nextPageToken` from the previous response."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Object Types",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objectTypes/{objectType}": {
+   "get": {
+    "summary": "Get Object Type",
+    "description": "Gets one object type: display names, primary key, title property, each property's data type and whether it can be filtered, and outgoing link types.",
+    "operationId": "get_object_type_api_v2_ontologies__ontology__objectTypes__objectType__get",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "objectType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them.",
+       "examples": [
+        "Material"
+       ],
+       "title": "Objecttype"
+      },
+      "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Object Types",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objectTypes/{objectType}/outgoingLinkTypes": {
+   "get": {
+    "summary": "List Outgoing Link Types",
+    "description": "Lists the link types that start at the object type, e.g. Material \u2192 categories, observations.",
+    "operationId": "link_types_api_v2_ontologies__ontology__objectTypes__objectType__outgoingLinkTypes_get",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "objectType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them.",
+       "examples": [
+        "Material"
+       ],
+       "title": "Objecttype"
+      },
+      "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Object Types",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objects/{objectType}": {
+   "get": {
+    "summary": "List Objects",
+    "description": "Lists the objects of the given type, ordered by primary key. Use Search Objects to filter and sort.",
+    "operationId": "list_objects_api_v2_ontologies__ontology__objects__objectType__get",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "objectType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them.",
+       "examples": [
+        "Material"
+       ],
+       "title": "Objecttype"
+      },
+      "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them."
+     },
+     {
+      "name": "pageSize",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The page size to use for the endpoint (1\u20131000, default 100).",
+       "title": "Pagesize"
+      },
+      "description": "The page size to use for the endpoint (1\u20131000, default 100)."
+     },
+     {
+      "name": "pageToken",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Omit on the first request; then pass `nextPageToken` from the previous response.",
+       "title": "Pagetoken"
+      },
+      "description": "Omit on the first request; then pass `nextPageToken` from the previous response."
+     },
+     {
+      "name": "select",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Repeatable. Property API names to return.",
+       "title": "Select"
+      },
+      "description": "Repeatable. Property API names to return."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ObjectList"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Ontology Objects",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objects/{objectType}/{primaryKey}": {
+   "get": {
+    "summary": "Get Object",
+    "description": "Gets a specific object by primary key (e.g. a Material id, a ManufacturingCategory slug, a Country ISO3).",
+    "operationId": "get_obj_api_v2_ontologies__ontology__objects__objectType___primaryKey__get",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "objectType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them.",
+       "examples": [
+        "Material"
+       ],
+       "title": "Objecttype"
+      },
+      "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them."
+     },
+     {
+      "name": "primaryKey",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Primary key value of the object.",
+       "examples": [
+        "248"
+       ],
+       "title": "Primarykey"
+      },
+      "description": "Primary key value of the object."
+     },
+     {
+      "name": "select",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Repeatable. Property API names to return.",
+       "title": "Select"
+      },
+      "description": "Repeatable. Property API names to return."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Ontology Objects",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objects/{objectType}/search": {
+   "post": {
+    "summary": "Search Objects",
+    "description": "Searches objects of the given type with a filter tree, ordering, property selection and paging.\n\n| Query type | Description |\n|---|---|\n| `eq`, `gt`, `gte`, `lt`, `lte` | Compare a scalar property with `value`. |\n| `isNull` | `value: true` matches nulls, `false` non-nulls. |\n| `in` | Property equals one of the listed values. |\n| `contains` | Array property contains `value` (e.g. `qualityFlags`). |\n| `startsWith` | Case-insensitive string prefix. |\n| `containsAnyTerm` / `containsAllTerms` | Case-insensitive term match on a string. |\n| `and`, `or` | `value` is a list of clauses. |\n| `not` | `value` is one clause. |",
+    "operationId": "search_objects_api_v2_ontologies__ontology__objects__objectType__search_post",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "objectType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them.",
+       "examples": [
+        "Material"
+       ],
+       "title": "Objecttype"
+      },
+      "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them."
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SearchBody"
+       },
+       "examples": {
+        "aluminium": {
+         "summary": "Aluminium grades with density",
+         "value": {
+          "where": {
+           "type": "and",
+           "value": [
+            {
+             "type": "eq",
+             "field": "family",
+             "value": "aluminium"
+            },
+            {
+             "type": "isNull",
+             "field": "densityKgM3",
+             "value": false
+            }
+           ]
+          },
+          "orderBy": {
+           "fields": [
+            {
+             "field": "name",
+             "direction": "asc"
+            }
+           ]
+          },
+          "pageSize": 5,
+          "select": [
+           "name",
+           "grade",
+           "densityKgM3"
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ObjectList"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Ontology Objects",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objects/{objectType}/aggregate": {
+   "post": {
+    "summary": "Aggregate Objects",
+    "description": "Computes count, min, max, avg, sum or approximateDistinct over objects, optionally filtered and grouped (`exact` or numeric `fixedWidth` buckets). `accuracy` is `APPROXIMATE` when groups were truncated by `maxGroupCount`.",
+    "operationId": "aggregate_objects_api_v2_ontologies__ontology__objects__objectType__aggregate_post",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "objectType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them.",
+       "examples": [
+        "Material"
+       ],
+       "title": "Objecttype"
+      },
+      "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them."
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AggregateBody"
+       },
+       "examples": {
+        "byFamily": {
+         "summary": "Median-free price stats by family",
+         "value": {
+          "aggregation": [
+           {
+            "type": "count",
+            "name": "n"
+           },
+           {
+            "type": "avg",
+            "field": "valueUsd",
+            "name": "avgUsdPerKg"
+           }
+          ],
+          "where": {
+           "type": "and",
+           "value": [
+            {
+             "type": "eq",
+             "field": "kind",
+             "value": "price"
+            },
+            {
+             "type": "eq",
+             "field": "unitNormalized",
+             "value": "USD/kg"
+            },
+            {
+             "type": "eq",
+             "field": "status",
+             "value": "verified"
+            }
+           ]
+          },
+          "groupBy": [
+           {
+            "type": "exact",
+            "field": "countryIso3",
+            "maxGroupCount": 20
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Ontology Objects",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/ontologies/{ontology}/objects/{objectType}/{primaryKey}/links/{linkType}": {
+   "get": {
+    "summary": "List Linked Objects",
+    "description": "Lists objects linked to the given object through the link type, e.g. `ManufacturingCategory/die-casting/links/materials` or `Material/248/links/observations`.",
+    "operationId": "linked_objects_api_v2_ontologies__ontology__objects__objectType___primaryKey__links__linkType__get",
+    "parameters": [
+     {
+      "name": "ontology",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name (`manufacturing`) or RID of the ontology.",
+       "examples": [
+        "manufacturing"
+       ],
+       "title": "Ontology"
+      },
+      "description": "The API name (`manufacturing`) or RID of the ontology."
+     },
+     {
+      "name": "objectType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them.",
+       "examples": [
+        "Material"
+       ],
+       "title": "Objecttype"
+      },
+      "description": "The API name of the object type, e.g. `Material`. Use List Object Types to discover them."
+     },
+     {
+      "name": "primaryKey",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Primary key of the source object.",
+       "examples": [
+        "die-casting"
+       ],
+       "title": "Primarykey"
+      },
+      "description": "Primary key of the source object."
+     },
+     {
+      "name": "linkType",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Link API name from List Outgoing Link Types.",
+       "examples": [
+        "materials"
+       ],
+       "title": "Linktype"
+      },
+      "description": "Link API name from List Outgoing Link Types."
+     },
+     {
+      "name": "pageSize",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The page size to use for the endpoint (1\u20131000, default 100).",
+       "title": "Pagesize"
+      },
+      "description": "The page size to use for the endpoint (1\u20131000, default 100)."
+     },
+     {
+      "name": "pageToken",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Omit on the first request; then pass `nextPageToken` from the previous response.",
+       "title": "Pagetoken"
+      },
+      "description": "Omit on the first request; then pass `nextPageToken` from the previous response."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ObjectList"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Ontologies",
+    "x-resource": "Linked Objects",
+    "x-scopes": [
+     "api:ontologies-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:ontologies-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/datasets": {
+   "get": {
+    "summary": "List Datasets",
+    "description": "Lists datasets imported from memory/ (one per CSV/JSON file or XLSX sheet, plus documents). Filter by category slug, inferred role, file type or a path substring.",
+    "operationId": "list_datasets_api_v2_datasets_get",
+    "parameters": [
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Category slug, e.g. `die-casting`.",
+       "title": "Category"
+      },
+      "description": "Category slug, e.g. `die-casting`."
+     },
+     {
+      "name": "role",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "materials, machines, processes, operations, lookup, variables, wage_grades, country_machine_rates, database, document \u2026",
+       "title": "Role"
+      },
+      "description": "materials, machines, processes, operations, lookup, variables, wage_grades, country_machine_rates, database, document \u2026"
+     },
+     {
+      "name": "fileType",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "csv, json, xlsx, md, pdf \u2026",
+       "title": "Filetype"
+      },
+      "description": "csv, json, xlsx, md, pdf \u2026"
+     },
+     {
+      "name": "pathContains",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Case-insensitive substring of the path.",
+       "title": "Pathcontains"
+      },
+      "description": "Case-insensitive substring of the path."
+     },
+     {
+      "name": "pageSize",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The page size to use for the endpoint (1\u20131000, default 100).",
+       "title": "Pagesize"
+      },
+      "description": "The page size to use for the endpoint (1\u20131000, default 100)."
+     },
+     {
+      "name": "pageToken",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Omit on the first request; then pass `nextPageToken` from the previous response.",
+       "title": "Pagetoken"
+      },
+      "description": "Omit on the first request; then pass `nextPageToken` from the previous response."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Datasets",
+    "x-resource": "Datasets",
+    "x-scopes": [
+     "api:datasets-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:datasets-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/datasets/{datasetRid}": {
+   "get": {
+    "summary": "Get Dataset",
+    "description": "Gets a dataset's metadata: original path, inferred role, category, row count and checksum.",
+    "operationId": "get_dataset_api_v2_datasets__datasetRid__get",
+    "parameters": [
+     {
+      "name": "datasetRid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id.",
+       "examples": [
+        "ri.emithran.main.dataset.42"
+       ],
+       "title": "Datasetrid"
+      },
+      "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Datasets",
+    "x-resource": "Datasets",
+    "x-scopes": [
+     "api:datasets-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:datasets-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/datasets/{datasetRid}/schema": {
+   "get": {
+    "summary": "Get Dataset Schema",
+    "description": "Returns the dataset's columns exactly as named in the file, with a type inferred from up to 500 rows (`LONG`, `DOUBLE`, `BOOLEAN`, `STRING`). Inference never changes stored values.",
+    "operationId": "get_schema_api_v2_datasets__datasetRid__schema_get",
+    "parameters": [
+     {
+      "name": "datasetRid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id.",
+       "examples": [
+        "ri.emithran.main.dataset.42"
+       ],
+       "title": "Datasetrid"
+      },
+      "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Datasets",
+    "x-resource": "Datasets",
+    "x-scopes": [
+     "api:datasets-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:datasets-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/datasets/{datasetRid}/readTable": {
+   "get": {
+    "summary": "Read Table Dataset",
+    "description": "Reads rows of a dataset as JSON (paged) or CSV (streamed). Values are returned exactly as imported. `where` performs a case-insensitive substring match over the whole row.",
+    "operationId": "read_table_api_v2_datasets__datasetRid__readTable_get",
+    "parameters": [
+     {
+      "name": "datasetRid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id.",
+       "examples": [
+        "ri.emithran.main.dataset.42"
+       ],
+       "title": "Datasetrid"
+      },
+      "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id."
+     },
+     {
+      "name": "format",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "enum": [
+        "JSON",
+        "CSV"
+       ],
+       "type": "string",
+       "description": "`JSON` (paged) or `CSV` (streams up to rowLimit rows).",
+       "default": "JSON",
+       "title": "Format"
+      },
+      "description": "`JSON` (paged) or `CSV` (streams up to rowLimit rows)."
+     },
+     {
+      "name": "columns",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Repeatable. Columns to return; default all.",
+       "title": "Columns"
+      },
+      "description": "Repeatable. Columns to return; default all."
+     },
+     {
+      "name": "rowLimit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 100000,
+         "minimum": 1
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "CSV only: maximum rows (default all).",
+       "title": "Rowlimit"
+      },
+      "description": "CSV only: maximum rows (default all)."
+     },
+     {
+      "name": "where",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Substring that must appear in the row.",
+       "title": "Where"
+      },
+      "description": "Substring that must appear in the row."
+     },
+     {
+      "name": "pageSize",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The page size to use for the endpoint (1\u20131000, default 100).",
+       "title": "Pagesize"
+      },
+      "description": "The page size to use for the endpoint (1\u20131000, default 100)."
+     },
+     {
+      "name": "pageToken",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Omit on the first request; then pass `nextPageToken` from the previous response.",
+       "title": "Pagetoken"
+      },
+      "description": "Omit on the first request; then pass `nextPageToken` from the previous response."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Datasets",
+    "x-resource": "Datasets",
+    "x-scopes": [
+     "api:datasets-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:datasets-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/datasets/{datasetRid}/files/content": {
+   "get": {
+    "summary": "Get File Content",
+    "description": "Downloads the original file from memory/ byte-for-byte (for an XLSX sheet dataset, the whole workbook). The SHA-256 checksum from Get Dataset lets you verify the download.",
+    "operationId": "file_content_api_v2_datasets__datasetRid__files_content_get",
+    "parameters": [
+     {
+      "name": "datasetRid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id.",
+       "examples": [
+        "ri.emithran.main.dataset.42"
+       ],
+       "title": "Datasetrid"
+      },
+      "description": "Dataset RID (`ri.emithran.main.dataset.<id>`) or numeric id."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Datasets",
+    "x-resource": "Files",
+    "x-scopes": [
+     "api:datasets-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:datasets-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/market/fxRates": {
+   "get": {
+    "summary": "Get FX Rates",
+    "description": "Latest crawled exchange rate per currency against USD with the 30-day change, compared with the internal `exchange_rate_table.csv` value and its date. `stale` is true when the latest point is older than 5 days.",
+    "operationId": "fx_rates_api_v2_market_fxRates_get",
+    "parameters": [
+     {
+      "name": "currencies",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Repeatable ISO 4217 filter, e.g. INR.",
+       "title": "Currencies"
+      },
+      "description": "Repeatable ISO 4217 filter, e.g. INR."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Market Intelligence",
+    "x-resource": "Exchange Rates",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/market/fxRates/{currency}/series": {
+   "get": {
+    "summary": "Get FX Rate Series",
+    "description": "Daily USD/{currency} observations from crawled sources between `startDate` and `endDate` (inclusive).",
+    "operationId": "fx_series_api_v2_market_fxRates__currency__series_get",
+    "parameters": [
+     {
+      "name": "currency",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "ISO 4217 code.",
+       "examples": [
+        "INR"
+       ],
+       "title": "Currency"
+      },
+      "description": "ISO 4217 code."
+     },
+     {
+      "name": "startDate",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "ISO date, default 1 year ago.",
+       "title": "Startdate"
+      },
+      "description": "ISO date, default 1 year ago."
+     },
+     {
+      "name": "endDate",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "ISO date, default today.",
+       "title": "Enddate"
+      },
+      "description": "ISO date, default today."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Market Intelligence",
+    "x-resource": "Exchange Rates",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/market/priceSeries": {
+   "get": {
+    "summary": "Get Price Series",
+    "description": "Dated price observations grouped into series (one per source \u00d7 entity \u00d7 metric \u00d7 country), with the change between first and last point. Filter by material RID, entity label, country or metric.",
+    "operationId": "price_series_api_v2_market_priceSeries_get",
+    "parameters": [
+     {
+      "name": "materialRid",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Material RID or id.",
+       "title": "Materialrid"
+      },
+      "description": "Material RID or id."
+     },
+     {
+      "name": "entity",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Exact entity label, e.g. `Aluminum` (Pink Sheet).",
+       "title": "Entity"
+      },
+      "description": "Exact entity label, e.g. `Aluminum` (Pink Sheet)."
+     },
+     {
+      "name": "countryIso3",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Countryiso3"
+      }
+     },
+     {
+      "name": "metric",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Metric"
+      }
+     },
+     {
+      "name": "verifiedOnly",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "description": "Exclude unverified observations.",
+       "default": false,
+       "title": "Verifiedonly"
+      },
+      "description": "Exclude unverified observations."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Market Intelligence",
+    "x-resource": "Prices",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/market/benchmarks": {
+   "get": {
+    "summary": "Get Regional Benchmarks",
+    "description": "Median normalized USD/kg by material family \u00d7 country across verified and unverified observations, with sample counts.",
+    "operationId": "benchmarks_api_v2_market_benchmarks_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "Market Intelligence",
+    "x-resource": "Prices",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/market/laborRates": {
+   "get": {
+    "summary": "Get Labor Rates",
+    "description": "Average labour, direct and indirect overhead (USD/h) per country across imported machine / work-center records. Zero or blank rates are excluded from averages.",
+    "operationId": "labor_api_v2_market_laborRates_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "Market Intelligence",
+    "x-resource": "Labor & Overhead",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/market/indicators": {
+   "get": {
+    "summary": "Get Indicators",
+    "description": "Macro / industry indicator series (e.g. World Bank manufacturing value added, Eurostat industrial production).",
+    "operationId": "indicators_api_v2_market_indicators_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    },
+    "x-group": "Market Intelligence",
+    "x-resource": "Indicators",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/intelligence/materials/compare": {
+   "post": {
+    "summary": "Compare Materials",
+    "description": "Side-by-side designations, technical properties (as reported by source files) and latest USD/kg price per country.",
+    "operationId": "compare_api_v2_intelligence_materials_compare_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CompareBody"
+       },
+       "examples": {
+        "x": {
+         "summary": "Compare",
+         "value": {
+          "materialRids": [
+           "ri.emithran.main.material.248",
+           "ri.emithran.main.material.249"
+          ]
+         }
+        }
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Material Intelligence",
+    "x-resource": "Materials",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/intelligence/materials/{materialRid}/alternatives": {
+   "post": {
+    "summary": "Get Material Alternatives",
+    "description": "**Preview** \u2014 call with `preview=true`. Ranks alternative materials for a process. Candidates must be listed for the same category, share the material class (and by default the family) and carry the reference's process capability flags (e.g. `Can Die Cast`). Nothing is estimated: factors without data are reported as null.",
+    "operationId": "alternatives_api_v2_intelligence_materials__materialRid__alternatives_post",
+    "parameters": [
+     {
+      "name": "materialRid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "examples": [
+        "ri.emithran.main.material.248"
+       ],
+       "title": "Materialrid"
+      }
+     },
+     {
+      "name": "preview",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "description": "Must be true for preview endpoints.",
+       "default": false,
+       "title": "Preview"
+      },
+      "description": "Must be true for preview endpoints."
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AltBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Material Intelligence",
+    "x-resource": "Materials",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": true,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  },
+  "/api/v2/intelligence/categories/{category}/materialFamilies": {
+   "get": {
+    "summary": "Get Material Families By Process",
+    "description": "Material families (with counts) that the taxonomy lists for a manufacturing category.",
+    "operationId": "families_api_v2_intelligence_categories__category__materialFamilies_get",
+    "parameters": [
+     {
+      "name": "category",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "examples": [
+        "die-casting"
+       ],
+       "title": "Category"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "x-group": "Material Intelligence",
+    "x-resource": "Processes",
+    "x-scopes": [
+     "api:market-read"
+    ],
+    "x-preview": false,
+    "security": [
+     {
+      "oauth2": [
+       "api:market-read"
+      ]
+     },
+     {
+      "apiKey": []
+     }
+    ]
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "AggregateBody": {
+    "properties": {
+     "aggregation": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Aggregation",
+      "description": "Metrics: `{type: count|min|max|avg|sum|approximateDistinct, field?, name?}` (1\u201310)."
+     },
+     "where": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Where",
+      "description": "Optional filter, same syntax as Search Objects."
+     },
+     "groupBy": {
+      "anyOf": [
+       {
+        "items": {
+         "additionalProperties": true,
+         "type": "object"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Groupby",
+      "description": "`{type: exact, field, maxGroupCount?}` or `{type: fixedWidth, field, fixedWidth}`."
+     }
+    },
+    "type": "object",
+    "required": [
+     "aggregation"
+    ],
+    "title": "AggregateBody"
+   },
+   "AltBody": {
+    "properties": {
+     "category": {
+      "type": "string",
+      "title": "Category",
+      "description": "Category slug giving the process context, e.g. `die-casting`."
+     },
+     "countryIso3": {
+      "type": "string",
+      "title": "Countryiso3",
+      "description": "Country whose prices are used for the cost factor.",
+      "default": "USA"
+     },
+     "weights": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object",
+      "title": "Weights",
+      "description": "cost, technical, availability, leadTime. Factors without verified data are dropped and the rest re-normalized."
+     },
+     "sameFamily": {
+      "type": "boolean",
+      "title": "Samefamily",
+      "description": "Restrict candidates to the reference material's family.",
+      "default": true
+     },
+     "limit": {
+      "type": "integer",
+      "maximum": 50.0,
+      "minimum": 1.0,
+      "title": "Limit",
+      "default": 10
+     }
+    },
+    "type": "object",
+    "required": [
+     "category"
+    ],
+    "title": "AltBody"
+   },
+   "Body_token_api_v2_oauth2_token_post": {
+    "properties": {
+     "grant_type": {
+      "type": "string",
+      "title": "Grant Type",
+      "examples": [
+       "client_credentials"
+      ]
+     },
+     "client_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Client Id"
+     },
+     "client_secret": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Client Secret"
+     },
+     "scope": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Scope",
+      "description": "Space-separated subset of the client's scopes."
+     }
+    },
+    "type": "object",
+    "required": [
+     "grant_type"
+    ],
+    "title": "Body_token_api_v2_oauth2_token_post"
+   },
+   "BuildIn": {
+    "properties": {
+     "source": {
+      "type": "string",
+      "title": "Source",
+      "description": "Source slug or RID."
+     },
+     "forceRefresh": {
+      "type": "boolean",
+      "title": "Forcerefresh",
+      "description": "Ignore content-hash / ETag checkpoints.",
+      "default": false
+     },
+     "backfill": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Backfill",
+      "description": "`{\"startDate\": \"2026-01-01\", \"endDate\": \"2026-10-27\"}` for sources with a backfill template."
+     }
+    },
+    "type": "object",
+    "required": [
+     "source"
+    ],
+    "title": "BuildIn"
+   },
+   "ClientIn": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Name"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "owner": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Owner"
+     },
+     "scopes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Scopes",
+      "description": "Subset of List Scopes."
+     },
+     "rateLimitPerMinute": {
+      "type": "integer",
+      "maximum": 100000.0,
+      "minimum": 1.0,
+      "title": "Ratelimitperminute",
+      "default": 600
+     },
+     "tokenTtlSeconds": {
+      "type": "integer",
+      "maximum": 86400.0,
+      "minimum": 300.0,
+      "title": "Tokenttlseconds",
+      "default": 3600
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "scopes"
+    ],
+    "title": "ClientIn"
+   },
+   "CompareBody": {
+    "properties": {
+     "materialRids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "maxItems": 6,
+      "minItems": 2,
+      "title": "Materialrids",
+      "description": "2\u20136 material RIDs or ids."
+     }
+    },
+    "type": "object",
+    "required": [
+     "materialRids"
+    ],
+    "title": "CompareBody"
+   },
+   "ConfirmIn": {
+    "properties": {
+     "definition": {
+      "type": "string",
+      "title": "Definition"
+     },
+     "confirmed_by": {
+      "type": "string",
+      "title": "Confirmed By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "definition",
+     "confirmed_by"
+    ],
+    "title": "ConfirmIn"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "JobIn": {
+    "properties": {
+     "source": {
+      "type": "string",
+      "title": "Source"
+     },
+     "params": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Params",
+      "default": {}
+     }
+    },
+    "type": "object",
+    "required": [
+     "source"
+    ],
+    "title": "JobIn"
+   },
+   "KeyIn": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Name"
+     },
+     "owner": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Owner"
+     },
+     "scopes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Scopes"
+     },
+     "rateLimitPerMinute": {
+      "type": "integer",
+      "maximum": 100000.0,
+      "minimum": 1.0,
+      "title": "Ratelimitperminute",
+      "default": 600
+     },
+     "expiresInDays": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 730.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Expiresindays",
+      "description": "Null for no expiry.",
+      "default": 90
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "scopes"
+    ],
+    "title": "KeyIn"
+   },
+   "ObjectList": {
+    "properties": {
+     "nextPageToken": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Nextpagetoken",
+      "description": "Token for the next page; absent on the last page."
+     },
+     "totalCount": {
+      "type": "integer",
+      "title": "Totalcount",
+      "description": "Total number of objects matching the request."
+     },
+     "data": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Data",
+      "description": "Objects. Each has `__apiName`, `__primaryKey`, `__rid`, `__title` plus properties."
+     }
+    },
+    "type": "object",
+    "required": [
+     "totalCount",
+     "data"
+    ],
+    "title": "ObjectList"
+   },
+   "RuleIn": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "series_key": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Series Key"
+     },
+     "material_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Material Id"
+     },
+     "threshold_pct": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Threshold Pct"
+     },
+     "window_days": {
+      "type": "integer",
+      "title": "Window Days",
+      "default": 30
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "kind"
+    ],
+    "title": "RuleIn"
+   },
+   "SearchBody": {
+    "properties": {
+     "where": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Where",
+      "description": "Filter clause. Leaf types: eq, gt, gte, lt, lte, isNull, in, contains, startsWith, containsAnyTerm, containsAllTerms (each with `field` and `value`); combinators: and, or (value: list), not (value: clause)."
+     },
+     "orderBy": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Orderby",
+      "description": "`{\"fields\": [{\"field\": \"name\", \"direction\": \"asc|desc\"}]}`"
+     },
+     "pageSize": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Pagesize",
+      "description": "Page size (1\u20131000, default 100)."
+     },
+     "pageToken": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Pagetoken",
+      "description": "Token from the previous response."
+     },
+     "select": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Select",
+      "description": "Property API names to include. Omit for all properties."
+     }
+    },
+    "type": "object",
+    "title": "SearchBody"
+   },
+   "SourceConfig": {
+    "properties": {
+     "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9\\-]{1,78}$",
+      "title": "Slug"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "base_url": {
+      "type": "string",
+      "title": "Base Url"
+     },
+     "website_category": {
+      "type": "string",
+      "title": "Website Category",
+      "default": "other"
+     },
+     "source_type": {
+      "type": "string",
+      "enum": [
+       "api",
+       "html",
+       "sitemap",
+       "rss",
+       "csv",
+       "xlsx",
+       "pdf",
+       "internal"
+      ],
+      "title": "Source Type"
+     },
+     "data_kinds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Data Kinds",
+      "default": []
+     },
+     "categories": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Categories",
+      "default": []
+     },
+     "materials": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Materials",
+      "default": []
+     },
+     "countries": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Countries",
+      "default": []
+     },
+     "processes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Processes",
+      "default": []
+     },
+     "access_method": {
+      "type": "string",
+      "title": "Access Method",
+      "default": "HTTPS GET"
+     },
+     "auth_env_var": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Auth Env Var"
+     },
+     "license": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "License"
+     },
+     "license_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "License Url"
+     },
+     "commercial_use": {
+      "type": "string",
+      "enum": [
+       "yes",
+       "no",
+       "conditional",
+       "unknown"
+      ],
+      "title": "Commercial Use",
+      "default": "unknown"
+     },
+     "attribution": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Attribution"
+     },
+     "verification_status": {
+      "type": "string",
+      "enum": [
+       "verified",
+       "url_verified",
+       "documented",
+       "key_required",
+       "planned",
+       "blocked_by_terms"
+      ],
+      "title": "Verification Status",
+      "default": "planned"
+     },
+     "verified_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Verified At"
+     },
+     "update_frequency": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Update Frequency"
+     },
+     "reliability": {
+      "type": "number",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Reliability",
+      "default": 0.5
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "active",
+       "paused",
+       "disabled"
+      ],
+      "title": "Status",
+      "default": "paused"
+     },
+     "schedule_interval_minutes": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 15.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Schedule Interval Minutes"
+     },
+     "schedule_cron": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Schedule Cron"
+     },
+     "concurrency": {
+      "type": "integer",
+      "maximum": 16.0,
+      "minimum": 1.0,
+      "title": "Concurrency",
+      "default": 1
+     },
+     "download_delay": {
+      "type": "number",
+      "maximum": 120.0,
+      "minimum": 0.0,
+      "title": "Download Delay",
+      "default": 1.0
+     },
+     "max_pages": {
+      "type": "integer",
+      "maximum": 100000.0,
+      "minimum": 1.0,
+      "title": "Max Pages",
+      "default": 50
+     },
+     "max_depth": {
+      "type": "integer",
+      "maximum": 10.0,
+      "minimum": 0.0,
+      "title": "Max Depth",
+      "default": 1
+     },
+     "respect_robots": {
+      "type": "boolean",
+      "title": "Respect Robots",
+      "default": true
+     },
+     "render_js": {
+      "type": "boolean",
+      "title": "Render Js",
+      "default": false
+     },
+     "resumable": {
+      "type": "boolean",
+      "title": "Resumable",
+      "default": false
+     },
+     "allowed_domains": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Allowed Domains",
+      "default": []
+     },
+     "allow_patterns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Allow Patterns",
+      "default": []
+     },
+     "deny_patterns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Deny Patterns",
+      "default": []
+     },
+     "start_urls": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Start Urls",
+      "default": []
+     },
+     "sitemap_urls": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Sitemap Urls",
+      "default": []
+     },
+     "pagination": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Pagination",
+      "default": {}
+     },
+     "extraction": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Extraction",
+      "default": {}
+     },
+     "validation": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Validation",
+      "default": {}
+     },
+     "backfill": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Backfill",
+      "default": {}
+     },
+     "freshness_sla_hours": {
+      "type": "integer",
+      "minimum": 1.0,
+      "title": "Freshness Sla Hours",
+      "default": 72
+     },
+     "notes": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Notes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "slug",
+     "name",
+     "base_url",
+     "source_type"
+    ],
+    "title": "SourceConfig"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   }
+  },
+  "securitySchemes": {
+   "oauth2": {
+    "type": "oauth2",
+    "flows": {
+     "clientCredentials": {
+      "tokenUrl": "/api/v2/oauth2/token",
+      "scopes": {
+       "api:ontologies-read": "Read ontology metadata and objects (materials, machines, processes, categories, observations \u2026)",
+       "api:datasets-read": "Read imported datasets: metadata, schema, rows and original files",
+       "api:market-read": "Read market and material intelligence (FX, price series, benchmarks, alternatives)",
+       "api:orchestration-read": "Read sources and builds (crawl jobs)",
+       "api:orchestration-write": "Start and cancel builds (crawl jobs)",
+       "api:admin": "Manage API clients, API keys and view usage"
+      }
+     }
+    }
+   },
+   "apiKey": {
+    "type": "http",
+    "scheme": "bearer",
+    "bearerFormat": "emk_<prefix>_<secret>"
+   }
+  }
+ },
+ "x-group-order": [
+  "General",
+  "Ontologies",
+  "Datasets",
+  "Market Intelligence",
+  "Material Intelligence",
+  "Orchestration",
+  "Admin"
+ ]
+}

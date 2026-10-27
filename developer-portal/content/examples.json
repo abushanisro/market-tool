@@ -1,0 +1,2209 @@
+{
+ "generatedAt": "2026-10-27T18:02:17.677164+00:00",
+ "examples": {
+  "GET /api/v2/ontologies": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "data": [
+     {
+      "apiName": "manufacturing",
+      "displayName": "Emithran Manufacturing",
+      "description": "Manufacturing taxonomy, materials, machines, processes, prices and market data imported from the memory/ folder and crawled public sources.",
+      "rid": "ri.emithran.main.ontology.manufacturing"
+     }
+    ]
+   }
+  },
+  "GET /api/v2/ontologies/{ontology}": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies/manufacturing",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "apiName": "manufacturing",
+    "displayName": "Emithran Manufacturing",
+    "description": "Manufacturing taxonomy, materials, machines, processes, prices and market data imported from the memory/ folder and crawled public sources.",
+    "rid": "ri.emithran.main.ontology.manufacturing"
+   }
+  },
+  "GET /api/v2/ontologies/{ontology}/objectTypes": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies/manufacturing/objectTypes",
+    "query": {
+     "pageSize": 2
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": "eyJvIjogMn0",
+    "data": [
+     {
+      "apiName": "ManufacturingCategory",
+      "displayName": "Manufacturing category",
+      "pluralDisplayName": "Manufacturing categories",
+      "description": "One per folder of the existing taxonomy. `originalFolder` keeps the folder name exactly as on disk.",
+      "primaryKey": "slug",
+      "titleProperty": "name",
+      "rid": "ri.emithran.main.object-type.ManufacturingCategory",
+      "status": "ACTIVE",
+      "properties": {
+       "slug": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Normalized identifier, e.g. `die-casting`.",
+        "filterable": true
+       },
+       "name": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Canonical display name.",
+        "filterable": true
+       },
+       "originalFolder": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Folder name exactly as in memory/ (spelling preserved).",
+        "filterable": true
+       },
+       "treeNodeName": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Matching node in digital_factory_tree.csv, if any.",
+        "filterable": true
+       },
+       "family": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Category family: casting, sheet_metal, machining, plastics \u2026",
+        "filterable": true
+       },
+       "parentId": {
+        "dataType": {
+         "type": "integer"
+        },
+        "description": "Internal id of the parent category (e.g. sand-casting \u2192 casting).",
+        "filterable": true
+       },
+       "datasetCount": {
+        "dataType": {
+         "type": "integer"
+        },
+        "description": "Number of imported files/sheets.",
+        "filterable": true
+       },
+       "rowCount": {
+        "dataType": {
+         "type": "integer"
+        },
+        "description": "Rows preserved across those files.",
+        "filterable": true
+       }
+      },
+      "links": [
+       {
+        "apiName": "datasets",
+        "objectTypeApiName": "Dataset",
+        "cardinality": "MANY",
+        "description": "Files imported from this folder."
+       },
+       {
+        "apiName": "materials",
+        "objectTypeApiName": "Material",
+        "cardinality": "MANY",
+        "description": "Materials listed in this category's material files."
+       },
+       {
+        "apiName": "machines",
+        "objectTypeApiName": "Machine",
+        "cardinality": "MANY",
+        "description": "Machines / work centers."
+       }
+      ]
+     },
+     {
+      "apiName": "TaxonomyNode",
+      "displayName": "Taxonomy node",
+      "pluralDisplayName": "Taxonomy nodes",
+      "description": "Verbatim rows of digital_factory_tree.csv.",
+      "primaryKey": "id",
+      "titleProperty": "name",
+      "rid": "ri.emithran.main.object-type.TaxonomyNode",
+      "status": "ACTIVE",
+      "properties": {
+       "id": {
+        "dataType": {
+         "type": "integer"
+        },
+        "description": "Row number.",
+        "filterable": true
+       },
+       "level": {
+        "dataType": {
+         "type": "integer"
+        },
+        "description": "Tree depth (0 = root).",
+        "filterable": true
+       },
+       "parentName": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Parent node name.",
+        "filterable": true
+       },
+       "name": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Node name.",
+        "filterable": true
+       },
+       "nodeType": {
+        "dataType": {
+         "type": "string"
+        },
+        "description": "Folder or Document.",
+        "filterable": true
+       },
+       "categoryId": {
+        "dataType": {
+         "type": "integer"
+        },
+        "description": "Mapped manufacturing category id, if any.",
+        "filterable": true
+       }
+      },
+      "links": []
+     }
+    ]
+   }
+  },
+  "GET /api/v2/ontologies/{ontology}/objectTypes/{objectType}": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies/manufacturing/objectTypes/Material",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "apiName": "Material",
+    "displayName": "Material",
+    "pluralDisplayName": "Materials",
+    "description": "Deduplicated raw material / grade with designations and technical properties as reported by the source files.",
+    "primaryKey": "id",
+    "titleProperty": "name",
+    "rid": "ri.emithran.main.object-type.Material",
+    "status": "ACTIVE",
+    "properties": {
+     "id": {
+      "dataType": {
+       "type": "integer"
+      },
+      "description": "Material id.",
+      "filterable": true
+     },
+     "name": {
+      "dataType": {
+       "type": "string"
+      },
+      "description": "Display name (original casing).",
+      "filterable": true
+     },
+     "key": {
+      "dataType": {
+       "type": "string"
+      },
+      "description": "Normalized identity key.",
+      "filterable": true
+     },
+     "family": {
+      "dataType": {
+       "type": "string"
+      },
+      "description": "Normalized family: steel, stainless_steel, aluminium, thermoplastic \u2026",
+      "filterable": true
+     },
+     "materialType": {
+      "dataType": {
+       "type": "string"
+      },
+      "description": "Material Type as written in the source.",
+      "filterable": true
+     },
+     "grade": {
+      "dataType": {
+       "type": "string"
+      },
+      "description": "Grade parsed from the name (e.g. AISI 304, ANSI 6061).",
+      "filterable": true
+     },
+     "cutCode": {
+      "dataType": {
+       "type": "string"
+      },
+      "description": "Cut code from the source.",
+      "filterable": true
+     },
+     "densityKgM3": {
+      "dataType": {
+       "type": "double"
+      },
+      "description": "Density in kg/m\u00b3.",
+      "filterable": true
+     },
+     "designations": {
+      "dataType": {
+       "type": "struct"
+      },
+      "description": "usa / din / en / gb / jis / european designations.",
+      "filterable": false
+     },
+     "technicalProperties": {
+      "dataType": {
+       "type": "struct"
+      },
+      "description": "Normalized property \u2192 {value, unit, original_header}.",
+      "filterable": false
+     },
+     "originalNames": {
+      "dataType": {
+       "type": "array"
+      },
+      "description": "Every spelling seen across files.",
+      "filterable": true
+     }
+    },
+    "links": [
+     {
+      "apiName": "categories",
+      "objectTypeApiName": "ManufacturingCategory",
+      "cardinality": "MANY",
+      "description": "Processes whose material lists include this material."
+     },
+     {
+      "apiName": "observations",
+      "objectTypeApiName": "Observation",
+      "cardinality": "MANY",
+      "description": "Price and property observations."
+     }
+    ]
+   }
+  },
+  "GET /api/v2/ontologies/{ontology}/objectTypes/{objectType}/outgoingLinkTypes": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies/manufacturing/objectTypes/Material/outgoingLinkTypes",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "data": [
+     {
+      "apiName": "categories",
+      "objectTypeApiName": "ManufacturingCategory",
+      "cardinality": "MANY",
+      "description": "Processes whose material lists include this material."
+     },
+     {
+      "apiName": "observations",
+      "objectTypeApiName": "Observation",
+      "cardinality": "MANY",
+      "description": "Price and property observations."
+     }
+    ]
+   }
+  },
+  "GET /api/v2/ontologies/{ontology}/objects/{objectType}": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies/manufacturing/objects/Material",
+    "query": {
+     "pageSize": 2,
+     "select": [
+      "name",
+      "family",
+      "grade"
+     ]
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": "eyJvIjogMn0",
+    "totalCount": 1318,
+    "data": [
+     {
+      "__apiName": "Material",
+      "__primaryKey": 1,
+      "__rid": "ri.emithran.main.material.1",
+      "__title": "Accura 10",
+      "name": "Accura 10",
+      "family": "additive_polymer",
+      "grade": null
+     },
+     {
+      "__apiName": "Material",
+      "__primaryKey": 2,
+      "__rid": "ri.emithran.main.material.2",
+      "__title": "Accura 25",
+      "name": "Accura 25",
+      "family": "additive_polymer",
+      "grade": null
+     }
+    ]
+   }
+  },
+  "GET /api/v2/ontologies/{ontology}/objects/{objectType}/{primaryKey}": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies/manufacturing/objects/Material/248",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "__apiName": "Material",
+    "__primaryKey": 248,
+    "__rid": "ri.emithran.main.material.248",
+    "__title": "Stainless Steel, AISI 304",
+    "id": 248,
+    "name": "Stainless Steel, AISI 304",
+    "key": "stainless steel aisi 304",
+    "family": "stainless_steel",
+    "materialType": "Stainless Steel",
+    "grade": "AISI 304",
+    "cutCode": "5.21",
+    "densityKgM3": 8073.0,
+    "designations": {
+     "usa": "Stainless Steel, AISI 304",
+     "din": "X5CrNi18-10",
+     "en": "1.4301",
+     "gb": "S30408",
+     "jis": "SUS304",
+     "source_name": "Generic Stainless Steel, AISI 304",
+     "other_id": "Generic Stainless Steel, AISI 304"
+    },
+    "technicalProperties": {
+     "density": {
+      "value": 8073.0,
+      "unit": "kg/m3",
+      "original_header": "Density (kg / m^3)"
+     },
+     "shear_strength": {
+      "value": 303.0,
+      "unit": "MPa",
+      "original_header": "Shear Strength (MPa)"
+     },
+     "hardness": {
+      "value": 200.0,
+      "unit": "as-reported",
+      "original_header": "Hardness"
+     },
+     "hardness_system": {
+      "value": "Brinell",
+      "unit": "-",
+      "original_header": "Hardness System"
+     },
+     "yield_strength": {
+      "value": 215.0,
+      "unit": "MPa",
+      "original_header": "Tensile Yield Strength (MPa)"
+     },
+     "uts": {
+      "value": 505.0,
+      "unit": "MPa",
+      "original_header": "Ultimate Tensile Strength (MPa)"
+     },
+     "milling_speed": {
+      "value": 0.0,
+      "unit": "m/min",
+      "original_header": "Milling Speed (m / min)"
+     },
+     "specific_heat": {
+      "value": 460.0,
+      "unit": "J/kg\u00b7K",
+      "original_header": "Specific Heat RT (J / kg * K)"
+     },
+     "heat_of_fusion": {
+      "value": 270000.0,
+      "unit": "J/kg",
+      "original_header": "Heat of Fusion (J / kg)"
+     },
+     "solidus_temp": {
+      "value": 1420.0,
+      "unit": "\u00b0C",
+      "original_header": "Solidus Temp (C)"
+     },
+     "thermal_conductivity": {
+      "value": 16.3,
+      "unit": "W/m\u00b7K",
+      "original_header": "Thermal Conductivity (Watts / m * C)"
+     },
+     "liquidus_temp": {
+      "value": 1426.0,
+      "unit": "\u00b0C",
+      "original_header": "Liquidus Temp (\u00b0C)"
+     },
+     "pour_temp": {
+      "value": 1569.0,
+      "unit": "\u00b0C",
+      "original_header": "Pour Temp (\u00b0C)"
+     },
+     "scrap_cost_pct": {
+      "value": 11.0,
+      "unit": "%",
+      "original_header": "Scrap Cost Percent (%)"
+     },
+     "forging_temp": {
+      "value": 1200.0,
+      "unit": "\u00b0C",
+      "original_header": "Forging Temperature (C)"
+     },
+     "mold_temp": {
+      "value": 400.0,
+      "unit": "\u00b0C",
+      "original_header": "Mold Temp (C)"
+     },
+     "youngs_modulus": {
+      "value": 207000.0,
+      "unit": "MPa",
+      "original_header": "Young's Modulus (MPa)"
+     },
+     "poissons_ratio": {
+      "value": 0.28,
+      "unit": "-",
+      "original_header": "Poisson's Ratio"
+     }
+    },
+    "originalNames": [
+     "Stainless Steel, AISI 304"
+    ]
+   }
+  },
+  "POST /api/v2/ontologies/{ontology}/objects/{objectType}/search": {
+   "request": {
+    "method": "POST",
+    "path": "/api/v2/ontologies/manufacturing/objects/Material/search",
+    "query": null,
+    "body": {
+     "where": {
+      "type": "and",
+      "value": [
+       {
+        "type": "eq",
+        "field": "family",
+        "value": "aluminium"
+       },
+       {
+        "type": "isNull",
+        "field": "densityKgM3",
+        "value": false
+       }
+      ]
+     },
+     "orderBy": {
+      "fields": [
+       {
+        "field": "name",
+        "direction": "asc"
+       }
+      ]
+     },
+     "pageSize": 3,
+     "select": [
+      "name",
+      "grade",
+      "densityKgM3"
+     ]
+    }
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": "eyJvIjogM30",
+    "totalCount": 118,
+    "data": [
+     {
+      "__apiName": "Material",
+      "__primaryKey": 394,
+      "__rid": "ri.emithran.main.material.394",
+      "__title": "Aluminum - Honeycomb Core - 1/8in Cell",
+      "name": "Aluminum - Honeycomb Core - 1/8in Cell",
+      "grade": null,
+      "densityKgM3": 354.04
+     },
+     {
+      "__apiName": "Material",
+      "__primaryKey": 395,
+      "__rid": "ri.emithran.main.material.395",
+      "__title": "Aluminum - Honeycomb Core - 3/16in Cell",
+      "name": "Aluminum - Honeycomb Core - 3/16in Cell",
+      "grade": null,
+      "densityKgM3": 49.6
+     },
+     {
+      "__apiName": "Material",
+      "__primaryKey": 396,
+      "__rid": "ri.emithran.main.material.396",
+      "__title": "Aluminum - Honeycomb Core - 3/8in Cell",
+      "name": "Aluminum - Honeycomb Core - 3/8in Cell",
+      "grade": null,
+      "densityKgM3": 48.06
+     }
+    ]
+   }
+  },
+  "POST /api/v2/ontologies/{ontology}/objects/{objectType}/aggregate": {
+   "request": {
+    "method": "POST",
+    "path": "/api/v2/ontologies/manufacturing/objects/Observation/aggregate",
+    "query": null,
+    "body": {
+     "aggregation": [
+      {
+       "type": "count",
+       "name": "n"
+      },
+      {
+       "type": "avg",
+       "field": "valueUsd",
+       "name": "avgUsdPerKg"
+      }
+     ],
+     "where": {
+      "type": "and",
+      "value": [
+       {
+        "type": "eq",
+        "field": "kind",
+        "value": "price"
+       },
+       {
+        "type": "eq",
+        "field": "unitNormalized",
+        "value": "USD/kg"
+       },
+       {
+        "type": "eq",
+        "field": "status",
+        "value": "verified"
+       }
+      ]
+     },
+     "groupBy": [
+      {
+       "type": "exact",
+       "field": "countryIso3",
+       "maxGroupCount": 10
+      }
+     ]
+    }
+   },
+   "status": 200,
+   "response": {
+    "excludedItems": 0,
+    "accuracy": "ACCURATE",
+    "data": [
+     {
+      "group": {
+       "countryIso3": "USA"
+      },
+      "metrics": [
+       {
+        "name": "n",
+        "value": 4590.0
+       },
+       {
+        "name": "avgUsdPerKg",
+        "value": 20.94595991285401
+       }
+      ]
+     },
+     {
+      "group": {
+       "countryIso3": "IND"
+      },
+      "metrics": [
+       {
+        "name": "n",
+        "value": 1137.0
+       },
+       {
+        "name": "avgUsdPerKg",
+        "value": 15.80598416886543
+       }
+      ]
+     },
+     {
+      "group": {
+       "countryIso3": "CHN"
+      },
+      "metrics": [
+       {
+        "name": "n",
+        "value": 473.0
+       },
+       {
+        "name": "avgUsdPerKg",
+        "value": 32.9138689217759
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "GET /api/v2/ontologies/{ontology}/objects/{objectType}/{primaryKey}/links/{linkType}": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/ontologies/manufacturing/objects/ManufacturingCategory/die-casting/links/materials",
+    "query": {
+     "pageSize": 2
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": "eyJvIjogMn0",
+    "totalCount": 69,
+    "data": [
+     {
+      "__apiName": "Material",
+      "__primaryKey": 262,
+      "__rid": "ri.emithran.main.material.262",
+      "__title": "Copper, UNS C62730",
+      "id": 262,
+      "name": "Copper, UNS C62730",
+      "key": "copper uns c62730",
+      "family": "copper",
+      "materialType": "Copper",
+      "grade": "UNS C62730",
+      "cutCode": "33.3",
+      "densityKgM3": 8930.0,
+      "designations": {
+       "usa": "Copper, UNS C62730",
+       "din": "CuAl10Ni5Fe4",
+       "en": "CW307G",
+       "gb": "QAl10-4-4",
+       "jis": "C 6301 P",
+       "source_name": "Generic Copper, UNS C62730",
+       "other_id": "Generic Copper, UNS C62730"
+      },
+      "technicalProperties": {
+       "density": {
+        "value": 8930.0,
+        "unit": "kg/m3",
+        "original_header": "Density (kg / m^3)"
+       },
+       "shear_strength": {
+        "value": 289.0,
+        "unit": "MPa",
+        "original_header": "Shear Strength (MPa)"
+       },
+       "hardness": {
+        "value": 100.0,
+        "unit": "as-reported",
+        "original_header": "Hardness"
+       },
+       "hardness_system": {
+        "value": "Brinell",
+        "unit": "-",
+        "original_header": "Hardness System"
+       },
+       "yield_strength": {
+        "value": 270.0,
+        "unit": "MPa",
+        "original_header": "Tensile Yield Strength (MPa)"
+       },
+       "uts": {
+        "value": 640.0,
+        "unit": "MPa",
+        "original_header": "Ultimate Tensile Strength (MPa)"
+       },
+       "milling_speed": {
+        "value": 0.0,
+        "unit": "m/min",
+        "original_header": "Milling Speed (m / min)"
+       },
+       "specific_heat": {
+        "value": 900.0,
+        "unit": "J/kg\u00b7K",
+        "original_header": "Specific Heat RT (J / kg * K)"
+       },
+       "heat_of_fusion": {
+        "value": 390000.0,
+        "unit": "J/kg",
+        "original_header": "Heat of Fusion (J / kg)"
+       },
+       "solidus_temp": {
+        "value": 1085.0,
+        "unit": "\u00b0C",
+        "original_header": "Solidus Temp (C)"
+       },
+       "thermal_conductivity": {
+        "value": 105.0,
+        "unit": "W/m\u00b7K",
+        "original_header": "Thermal Conductivity (Watts / m * C)"
+       },
+       "liquidus_temp": {
+        "value": 1085.0,
+        "unit": "\u00b0C",
+        "original_header": "Liquidus Temp (\u00b0C)"
+       },
+       "pour_temp": {
+        "value": 1194.0,
+        "unit": "\u00b0C",
+        "original_header": "Pour Temp (\u00b0C)"
+       },
+       "clamping_pressure": {
+        "value": 48.0,
+        "unit": "MPa",
+        "original_header": "Clamping Pressure (MPa)"
+       },
+       "mold_temp": {
+        "value": 220.0,
+        "unit": "\u00b0C",
+        "original_header": "Mold Temp (C)"
+       },
+       "scrap_cost_pct": {
+        "value": 31.0,
+        "unit": "%",
+        "original_header": "Scrap Cost Percent (%)"
+       },
+       "forging_temp": {
+        "value": 846.0,
+        "unit": "\u00b0C",
+        "original_header": "Forging Temperature (C)"
+       },
+       "youngs_modulus": {
+        "value": 115000.0,
+        "unit": "MPa",
+        "original_header": "Young's Modulus (MPa)"
+       },
+       "poissons_ratio": {
+        "value": 0.34,
+        "unit": "-",
+        "original_header": "Poisson's Ratio"
+       }
+      },
+      "originalNames": [
+       "Copper, UNS C62730"
+      ]
+     },
+     {
+      "__apiName": "Material",
+      "__primaryKey": 263,
+      "__rid": "ri.emithran.main.material.263",
+      "__title": "Copper, UNS C51900",
+      "id": 263,
+      "name": "Copper, UNS C51900",
+      "key": "copper uns c51900",
+      "family": "copper",
+      "materialType": "Copper",
+      "grade": "UNS C51900",
+      "cutCode": "33.3",
+      "densityKgM3": 8930.0,
+      "designations": {
+       "usa": "Copper, UNS C51900",
+       "din": "CuSn 6",
+       "en": "2.1020",
+       "gb": "QSn6.5-0.1",
+       "jis": "C 5191",
+       "source_name": "Generic Copper, UNS C51900",
+       "other_id": "Generic Copper, UNS C51900"
+      },
+      "technicalProperties": {
+       "density": {
+        "value": 8930.0,
+        "unit": "kg/m3",
+        "original_header": "Density (kg / m^3)"
+       },
+       "shear_strength": {
+        "value": 289.0,
+        "unit": "MPa",
+        "original_header": "Shear Strength (MPa)"
+       },
+       "hardness": {
+        "value": 100.0,
+        "unit": "as-reported",
+        "original_header": "Hardness"
+       },
+       "hardness_system": {
+        "value": "Brinell",
+        "unit": "-",
+        "original_header": "Hardness System"
+       },
+       "yield_strength": {
+        "value": 506.0,
+        "unit": "MPa",
+        "original_header": "Tensile Yield Strength (MPa)"
+       },
+       "uts": {
+        "value": 606.0,
+        "unit": "MPa",
+        "original_header": "Ultimate Tensile Strength (MPa)"
+       },
+       "milling_speed": {
+        "value": 0.0,
+        "unit": "m/min",
+        "original_header": "Milling Speed (m / min)"
+       },
+       "specific_heat": {
+        "value": 900.0,
+        "unit": "J/kg\u00b7K",
+        "original_header": "Specific Heat RT (J / kg * K)"
+       },
+       "heat_of_fusion": {
+        "value": 390000.0,
+        "unit": "J/kg",
+        "original_header": "Heat of Fusion (J / kg)"
+       },
+       "solidus_temp": {
+        "value": 1085.0,
+        "unit": "\u00b0C",
+        "original_header": "Solidus Temp (C)"
+       },
+       "thermal_conductivity": {
+        "value": 105.0,
+        "unit": "W/m\u00b7K",
+        "original_header": "Thermal Conductivity (Watts / m * C)"
+       },
+       "liquidus_temp": {
+        "value": 1085.0,
+        "unit": "\u00b0C",
+        "original_header": "Liquidus Temp (\u00b0C)"
+       },
+       "pour_temp": {
+        "value": 1194.0,
+        "unit": "\u00b0C",
+        "original_header": "Pour Temp (\u00b0C)"
+       },
+       "clamping_pressure": {
+        "value": 48.0,
+        "unit": "MPa",
+        "original_header": "Clamping Pressure (MPa)"
+       },
+       "mold_temp": {
+        "value": 220.0,
+        "unit": "\u00b0C",
+        "original_header": "Mold Temp (C)"
+       },
+       "scrap_cost_pct": {
+        "value": 31.0,
+        "unit": "%",
+        "original_header": "Scrap Cost Percent (%)"
+       },
+       "forging_temp": {
+        "value": 813.0,
+        "unit": "\u00b0C",
+        "original_header": "Forging Temperature (C)"
+       },
+       "youngs_modulus": {
+        "value": 115000.0,
+        "unit": "MPa",
+        "original_header": "Young's Modulus (MPa)"
+       },
+       "poissons_ratio": {
+        "value": 0.34,
+        "unit": "-",
+        "original_header": "Poisson's Ratio"
+       }
+      },
+      "originalNames": [
+       "Copper, UNS C51900"
+      ]
+     }
+    ]
+   }
+  },
+  "GET /api/v2/datasets": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/datasets",
+    "query": {
+     "category": "die-casting",
+     "role": "materials"
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": null,
+    "totalCount": 2,
+    "data": [
+     {
+      "rid": "ri.emithran.main.dataset.298",
+      "name": "aPriori_India_Raw_Material_Prices.csv",
+      "path": "Die Casting/Indian data/aPriori_India_Raw_Material_Prices.csv",
+      "fileType": "csv",
+      "role": "materials",
+      "category": "die-casting",
+      "countryIso3": "IND",
+      "rowCount": 67,
+      "columnCount": 4,
+      "sizeBytes": 4460,
+      "checksum": {
+       "algorithm": "SHA-256",
+       "value": "e496537f3479b526b970a5463e6b71888cd9d77141efc43cba33cab05983db00"
+      },
+      "importedAt": "2026-10-27T17:26:49.328498+00:00"
+     },
+     {
+      "rid": "ri.emithran.main.dataset.358",
+      "name": "materials_master.csv",
+      "path": "Die Casting/Raw Material/materials_master.csv",
+      "fileType": "csv",
+      "role": "materials",
+      "category": "die-casting",
+      "countryIso3": null,
+      "rowCount": 68,
+      "columnCount": 33,
+      "sizeBytes": 21460,
+      "checksum": {
+       "algorithm": "SHA-256",
+       "value": "e78cbd195e5039679f58c5d7f05b3aaed10dfac1a6ef81666469da217671a872"
+      },
+      "importedAt": "2026-10-27T17:26:49.671141+00:00"
+     }
+    ]
+   }
+  },
+  "GET /api/v2/datasets/{datasetRid}": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/datasets/ri.emithran.main.dataset.26",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "rid": "ri.emithran.main.dataset.26",
+    "name": "Raw materials.csv",
+    "path": "Additive Manufacturing/Raw materials.csv",
+    "fileType": "csv",
+    "role": "materials",
+    "category": "additive-manufacturing",
+    "countryIso3": null,
+    "rowCount": 96,
+    "columnCount": 17,
+    "sizeBytes": 19017,
+    "checksum": {
+     "algorithm": "SHA-256",
+     "value": "26333c546d9ff991115bac438dd71e5bb1cf56fa29b4859f1b682b5a7ab67d4a"
+    },
+    "importedAt": "2026-10-27T17:26:12.783700+00:00"
+   }
+  },
+  "GET /api/v2/datasets/{datasetRid}/schema": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/datasets/ri.emithran.main.dataset.26/schema",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "datasetRid": "ri.emithran.main.dataset.26",
+    "fieldSchemaList": [
+     {
+      "name": "Name",
+      "type": "STRING",
+      "nullable": false
+     },
+     {
+      "name": "Source Name",
+      "type": "STRING",
+      "nullable": false
+     },
+     {
+      "name": "Process",
+      "type": "STRING",
+      "nullable": false
+     }
+    ]
+   }
+  },
+  "GET /api/v2/datasets/{datasetRid}/readTable": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/datasets/ri.emithran.main.dataset.26/readTable",
+    "query": {
+     "pageSize": 2
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": "eyJvIjogMn0",
+    "totalCount": 96,
+    "columns": [
+     "Name",
+     "Source Name",
+     "Process"
+    ],
+    "data": [
+     {
+      "rowIndex": 0,
+      "values": {
+       "Name": "Accura 10",
+       "Source Name": "Generic Accura 10",
+       "Process": "SLA",
+       "Description": "Clear Amber, Rigid",
+       "Manufacturer": "3D Systems",
+       "Cut Code": "51.31",
+       "Material Type": "Accura",
+       "Unit Cost (USD / kg)": "194.00",
+       "Cost Units": "Cost per KG",
+       "Base Cost Per Unit (USD)": "194.00",
+       "Density (kg / m^3)": "1210.00",
+       "Tapped Density (kg / m^3)": "0.00",
+       "Hardness": "30.00",
+       "Hardness System": "Brinell",
+       "Max Powder Cycles": "0.00",
+       "Recycle Percentage": "0.00",
+       "Data Source": "aPriori Baseline"
+      }
+     },
+     {
+      "rowIndex": 1,
+      "values": {
+       "Name": "Accura 25",
+       "Source Name": "Generic Accura 25",
+       "Process": "SLA",
+       "Description": "White, Flexible",
+       "Manufacturer": "3D Systems",
+       "Cut Code": "51.31",
+       "Material Type": "Accura",
+       "Unit Cost (USD / kg)": "234.00",
+       "Cost Units": "Cost per KG",
+       "Base Cost Per Unit (USD)": "234.00",
+       "Density (kg / m^3)": "1190.00",
+       "Tapped Density (kg / m^3)": "0.00",
+       "Hardness": "30.00",
+       "Hardness System": "Brinell",
+       "Max Powder Cycles": "0.00",
+       "Recycle Percentage": "0.00",
+       "Data Source": "aPriori Baseline"
+      }
+     }
+    ]
+   }
+  },
+  "GET /api/v2/market/fxRates": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/market/fxRates",
+    "query": {
+     "currencies": [
+      "INR",
+      "EUR"
+     ]
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "base": "USD",
+    "data": [
+     {
+      "pair": "USD/EUR",
+      "currency": "EUR",
+      "latest": 0.89686,
+      "latest_date": "2026-10-27",
+      "latest_source_id": 1,
+      "replayed": true,
+      "change_30d_pct": 2.27,
+      "internal_table_rate": 0.8464,
+      "internal_table_date": "2026-01-06",
+      "internal_vs_latest_pct": -5.63,
+      "stale": false
+     },
+     {
+      "pair": "USD/INR",
+      "currency": "INR",
+      "latest": 95.12,
+      "latest_date": "2026-10-27",
+      "latest_source_id": 1,
+      "replayed": true,
+      "change_30d_pct": -0.73,
+      "internal_table_rate": 64.3455,
+      "internal_table_date": "2017-12-11",
+      "internal_vs_latest_pct": -32.35,
+      "stale": false
+     }
+    ]
+   }
+  },
+  "GET /api/v2/market/fxRates/{currency}/series": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/market/fxRates/INR/series",
+    "query": {
+     "startDate": "2026-10-21"
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "pair": "USD/INR",
+    "data": [
+     {
+      "date": "2026-10-21",
+      "rate": 94.47,
+      "status": "verified",
+      "flags": [
+       "replayed"
+      ],
+      "observationRid": "ri.emithran.main.observation.432"
+     },
+     {
+      "date": "2026-10-22",
+      "rate": 94.82,
+      "status": "verified",
+      "flags": [
+       "replayed"
+      ],
+      "observationRid": "ri.emithran.main.observation.437"
+     },
+     {
+      "date": "2026-10-23",
+      "rate": 94.94,
+      "status": "verified",
+      "flags": [
+       "replayed"
+      ],
+      "observationRid": "ri.emithran.main.observation.442"
+     }
+    ]
+   }
+  },
+  "GET /api/v2/market/priceSeries": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/market/priceSeries",
+    "query": {
+     "materialRid": "ri.emithran.main.material.248"
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "data": [
+     {
+      "key": "ds:151|price|stainless steel, aisi 304|unit_cost:angle bar|USA",
+      "entity": "Stainless Steel, AISI 304",
+      "metric": "unit_cost:angle bar",
+      "country": "USA",
+      "unit": "USD / kg",
+      "unit_normalized": "USD/kg",
+      "source_id": null,
+      "dataset_id": 151,
+      "points": [
+       {
+        "date": "2026-03-01",
+        "value": 4.538,
+        "value_usd": 4.538,
+        "status": "verified",
+        "flags": [
+         "country_from_digital_factory_default",
+         "period_from_release_metadata"
+        ],
+        "id": 1221
+       }
+      ],
+      "change_pct": 0.0,
+      "latest": {
+       "date": "2026-03-01",
+       "value": 4.538,
+       "value_usd": 4.538,
+       "status": "verified",
+       "flags": [
+        "country_from_digital_factory_default",
+        "period_from_release_metadata"
+       ],
+       "id": 1221
+      }
+     },
+     {
+      "key": "ds:151|price|stainless steel, aisi 304|unit_cost:channel bar|USA",
+      "entity": "Stainless Steel, AISI 304",
+      "metric": "unit_cost:channel bar",
+      "country": "USA",
+      "unit": "USD / kg",
+      "unit_normalized": "USD/kg",
+      "source_id": null,
+      "dataset_id": 151,
+      "points": [
+       {
+        "date": "2026-03-01",
+        "value": 4.299,
+        "value_usd": 4.299,
+        "status": "verified",
+        "flags": [
+         "country_from_digital_factory_default",
+         "period_from_release_metadata"
+        ],
+        "id": 1222
+       }
+      ],
+      "change_pct": 0.0,
+      "latest": {
+       "date": "2026-03-01",
+       "value": 4.299,
+       "value_usd": 4.299,
+       "status": "verified",
+       "flags": [
+        "country_from_digital_factory_default",
+        "period_from_release_metadata"
+       ],
+       "id": 1222
+      }
+     },
+     {
+      "key": "ds:151|price|stainless steel, aisi 304|unit_cost:hex bar|USA",
+      "entity": "Stainless Steel, AISI 304",
+      "metric": "unit_cost:hex bar",
+      "country": "USA",
+      "unit": "USD / kg",
+      "unit_normalized": "USD/kg",
+      "source_id": null,
+      "dataset_id": 151,
+      "points": [
+       {
+        "date": "2026-03-01",
+        "value": 4.579,
+        "value_usd": 4.579,
+        "status": "verified",
+        "flags": [
+         "country_from_digital_factory_default",
+         "period_from_release_metadata"
+        ],
+        "id": 1223
+       }
+      ],
+      "change_pct": 0.0,
+      "latest": {
+       "date": "2026-03-01",
+       "value": 4.579,
+       "value_usd": 4.579,
+       "status": "verified",
+       "flags": [
+        "country_from_digital_factory_default",
+        "period_from_release_metadata"
+       ],
+       "id": 1223
+      }
+     }
+    ]
+   }
+  },
+  "GET /api/v2/market/benchmarks": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/market/benchmarks",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "countries": [
+     "USA",
+     "IND",
+     "XEE"
+    ],
+    "families": [
+     "steel",
+     "aluminium",
+     "thermoplastic"
+    ],
+    "cells": [
+     {
+      "family": "cast_iron",
+      "country": "MEX",
+      "median": 0.78,
+      "n": 30
+     },
+     {
+      "family": "additive_polymer",
+      "country": "USA",
+      "median": 240.0,
+      "n": 188
+     },
+     {
+      "family": "aluminium",
+      "country": "USA",
+      "median": 6.477,
+      "n": 1083
+     }
+    ]
+   }
+  },
+  "GET /api/v2/market/laborRates": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/market/laborRates",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "data": [
+     {
+      "country": "IND",
+      "country_name": "India",
+      "machines": 5670,
+      "avg_labor_usd_hr": 2.07,
+      "avg_direct_overhead_usd_hr": 37.02,
+      "avg_indirect_overhead_usd_hr": 2.59
+     },
+     {
+      "country": "CHN",
+      "country_name": "China",
+      "machines": 4572,
+      "avg_labor_usd_hr": 11.09,
+      "avg_direct_overhead_usd_hr": 34.22,
+      "avg_indirect_overhead_usd_hr": 6.53
+     },
+     {
+      "country": "MEX",
+      "country_name": "Mexico",
+      "machines": 4571,
+      "avg_labor_usd_hr": 10.58,
+      "avg_direct_overhead_usd_hr": 52.97,
+      "avg_indirect_overhead_usd_hr": 4.01
+     }
+    ]
+   }
+  },
+  "GET /api/v2/market/indicators": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/market/indicators",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "data": [
+     {
+      "key": "src:worldbank-wdi-manufacturing|indicator|manufacturing, value added (% of gdp)|nv.ind.manf.zs|DEU",
+      "entity": "Manufacturing, value added (% of GDP)",
+      "metric": "NV.IND.MANF.ZS",
+      "country": "DEU",
+      "unit": "%",
+      "unit_normalized": null,
+      "source_id": 2,
+      "dataset_id": null,
+      "points": [
+       {
+        "date": "2022-12-31",
+        "value": 18.3217735042199,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 457
+       },
+       {
+        "date": "2023-12-31",
+        "value": 18.9402532641593,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 456
+       },
+       {
+        "date": "2024-12-31",
+        "value": 18.0067082931968,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 455
+       }
+      ],
+      "change_pct": -3.87,
+      "latest": {
+       "date": "2025-12-31",
+       "value": 17.613151047784,
+       "value_usd": null,
+       "status": "verified",
+       "flags": [
+        "replayed"
+       ],
+       "id": 454
+      }
+     },
+     {
+      "key": "src:worldbank-wdi-manufacturing|indicator|manufacturing, value added (% of gdp)|nv.ind.manf.zs|JPN",
+      "entity": "Manufacturing, value added (% of GDP)",
+      "metric": "NV.IND.MANF.ZS",
+      "country": "JPN",
+      "unit": "%",
+      "unit_normalized": null,
+      "source_id": 2,
+      "dataset_id": null,
+      "points": [
+       {
+        "date": "2022-12-31",
+        "value": 18.8237454364041,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 464
+       },
+       {
+        "date": "2023-12-31",
+        "value": 19.4882904000273,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 463
+       },
+       {
+        "date": "2024-12-31",
+        "value": 18.817440470747,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 462
+       }
+      ],
+      "change_pct": -0.03,
+      "latest": {
+       "date": "2024-12-31",
+       "value": 18.817440470747,
+       "value_usd": null,
+       "status": "verified",
+       "flags": [
+        "replayed"
+       ],
+       "id": 462
+      }
+     },
+     {
+      "key": "src:worldbank-wdi-manufacturing|indicator|manufacturing, value added (% of gdp)|nv.ind.manf.zs|IND",
+      "entity": "Manufacturing, value added (% of GDP)",
+      "metric": "NV.IND.MANF.ZS",
+      "country": "IND",
+      "unit": "%",
+      "unit_normalized": null,
+      "source_id": 2,
+      "dataset_id": null,
+      "points": [
+       {
+        "date": "2022-12-31",
+        "value": 13.3327202623974,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 461
+       },
+       {
+        "date": "2023-12-31",
+        "value": 13.312843875072,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 460
+       },
+       {
+        "date": "2024-12-31",
+        "value": 13.1392199491326,
+        "value_usd": null,
+        "status": "verified",
+        "flags": [
+         "replayed"
+        ],
+        "id": 459
+       }
+      ],
+      "change_pct": 1.04,
+      "latest": {
+       "date": "2025-12-31",
+       "value": 13.4710550684648,
+       "value_usd": null,
+       "status": "verified",
+       "flags": [
+        "replayed"
+       ],
+       "id": 458
+      }
+     }
+    ]
+   }
+  },
+  "POST /api/v2/intelligence/materials/compare": {
+   "request": {
+    "method": "POST",
+    "path": "/api/v2/intelligence/materials/compare",
+    "query": null,
+    "body": {
+     "materialRids": [
+      "ri.emithran.main.material.248",
+      "ri.emithran.main.material.36"
+     ]
+    }
+   },
+   "status": 200,
+   "response": {
+    "materials": [
+     {
+      "id": 248,
+      "name": "Stainless Steel, AISI 304",
+      "family": "stainless_steel",
+      "family_label": "Stainless steel",
+      "grade": "AISI 304",
+      "material_type": "Stainless Steel",
+      "processes": [
+       {
+        "category": "bar-tube-fabrication",
+        "name": "Bar & Tube Fabrication",
+        "capabilities": {},
+        "dataset_id": 151
+       },
+       {
+        "category": "investment-casting",
+        "name": "Investment Casting",
+        "capabilities": {},
+        "dataset_id": 220
+       },
+       {
+        "category": "investment-casting",
+        "name": "Investment Casting",
+        "capabilities": {},
+        "dataset_id": 263
+       }
+      ],
+      "price_by_country": {
+       "USA": {
+        "id": 5006,
+        "value_usd": 4.482,
+        "unit": "USD/kg",
+        "value": 4.482,
+        "unit_original": "USD / kg",
+        "currency": "USD",
+        "country": "USA",
+        "period_date": "2026-03-01",
+        "status": "verified",
+        "confidence": 0.95,
+        "flags": [
+         "country_from_digital_factory_default",
+         "period_from_release_metadata"
+        ],
+        "metric": "unit_cost:square bar",
+        "source_id": null,
+        "dataset_id": 1144
+       },
+       "IND": {
+        "id": 3602,
+        "value_usd": 2.255,
+        "unit": "USD/kg",
+        "value": 2.255,
+        "unit_original": "USD/kg",
+        "currency": "USD",
+        "country": "IND",
+        "period_date": null,
+        "status": "verified",
+        "confidence": 0.85,
+        "flags": [
+         "as_of_unknown",
+         "country_from_path"
+        ],
+        "metric": "unit_cost:square_bar_usd_per_kg",
+        "source_id": null,
+        "dataset_id": 721
+       }
+      },
+      "rid": "ri.emithran.main.material.248"
+     },
+     {
+      "id": 36,
+      "name": "Objet Durus 430",
+      "family": "stainless_steel",
+      "family_label": "Stainless steel",
+      "grade": null,
+      "material_type": "Simulated Polypropylene",
+      "processes": [
+       {
+        "category": "additive-manufacturing",
+        "name": "Additive Manufacturing",
+        "capabilities": {},
+        "dataset_id": 26
+       }
+      ],
+      "price_by_country": {
+       "USA": {
+        "id": 523,
+        "value_usd": 322.0,
+        "unit": "USD/kg",
+        "value": 322.0,
+        "unit_original": "USD / kg",
+        "currency": "USD",
+        "country": "USA",
+        "period_date": "2026-03-01",
+        "status": "verified",
+        "confidence": 0.95,
+        "flags": [
+         "country_from_digital_factory_default",
+         "period_from_release_metadata"
+        ],
+        "metric": "unit_cost:base",
+        "source_id": null,
+        "dataset_id": 26
+       }
+      },
+      "rid": "ri.emithran.main.material.36"
+     }
+    ],
+    "properties": [
+     {
+      "property": "density",
+      "unit": "kg/m3",
+      "values": [
+       8073.0,
+       1160.0
+      ]
+     },
+     {
+      "property": "hardness",
+      "unit": "as-reported",
+      "values": [
+       200.0,
+       30.0
+      ]
+     },
+     {
+      "property": "liquidus_temp",
+      "unit": "\u00b0C",
+      "values": [
+       1426.0,
+       null
+      ]
+     }
+    ],
+    "designations": [
+     {
+      "standard": "din",
+      "values": [
+       "X5CrNi18-10",
+       null
+      ]
+     },
+     {
+      "standard": "en",
+      "values": [
+       "1.4301",
+       null
+      ]
+     },
+     {
+      "standard": "gb",
+      "values": [
+       "S30408",
+       null
+      ]
+     }
+    ]
+   }
+  },
+  "POST /api/v2/intelligence/materials/{materialRid}/alternatives": {
+   "request": {
+    "method": "POST",
+    "path": "/api/v2/intelligence/materials/ri.emithran.main.material.248/alternatives",
+    "query": {
+     "preview": "true"
+    },
+    "body": {
+     "category": "sheet-metal-stretch-forming",
+     "countryIso3": "USA",
+     "limit": 3
+    }
+   },
+   "status": 200,
+   "response": {
+    "reference": {
+     "id": 248,
+     "name": "Stainless Steel, AISI 304",
+     "family": "stainless_steel",
+     "family_label": "Stainless steel",
+     "material_type": "Stainless Steel",
+     "grade": "AISI 304",
+     "designations": {
+      "usa": "Stainless Steel, AISI 304",
+      "din": "X5CrNi18-10",
+      "en": "1.4301",
+      "gb": "S30408",
+      "jis": "SUS304",
+      "source_name": "Generic Stainless Steel, AISI 304",
+      "other_id": "Generic Stainless Steel, AISI 304"
+     },
+     "cut_code": "5.21",
+     "density_kg_m3": 8073.0,
+     "original_names": [
+      "Stainless Steel, AISI 304"
+     ],
+     "price": {
+      "id": 1221,
+      "value_usd": 4.538,
+      "unit": "USD/kg",
+      "value": 4.538,
+      "unit_original": "USD / kg",
+      "currency": "USD",
+      "country": "USA",
+      "period_date": "2026-03-01",
+      "status": "verified",
+      "confidence": 0.95,
+      "flags": [
+       "country_from_digital_factory_default",
+       "period_from_release_metadata"
+      ],
+      "metric": "unit_cost:angle bar",
+      "source_id": null,
+      "dataset_id": 151
+     },
+     "required_capabilities": [],
+     "rid": "ri.emithran.main.material.248"
+    },
+    "category": "sheet-metal-stretch-forming",
+    "weights": {
+     "cost": 0.4,
+     "technical": 0.4,
+     "availability": 0.1,
+     "lead_time": 0.1
+    },
+    "items": [
+     {
+      "id": 340,
+      "name": "Stainless Steel, A351 CF8",
+      "family": "stainless_steel",
+      "family_label": "Stainless steel",
+      "material_type": "Stainless Steel",
+      "grade": "A351",
+      "designations": {
+       "usa": "Stainless Steel, A351 CF8",
+       "din": "GX5CrNi19-10",
+       "en": "1.4308",
+       "gb": "00Cr19Ni10",
+       "jis": "SCS13A",
+       "source_name": "Generic Stainless Steel, A351 CF8",
+       "other_id": "Generic Stainless Steel, A351 CF8"
+      },
+      "cut_code": "15.21",
+      "density_kg_m3": 7880.0,
+      "original_names": [
+       "Stainless Steel, A351 CF8"
+      ],
+      "score": 0.797,
+      "factors": {
+       "cost": 0.6847730277655355,
+       "technical": 0.9090862685662116,
+       "availability": null,
+       "lead_time": null
+      },
+      "compared_properties": [
+       "density",
+       "uts",
+       "yield_strength"
+      ],
+      "price": {
+       "id": 1988,
+       "value_usd": 2.861,
+       "unit": "USD/kg",
+       "value": 2.861,
+       "unit_original": "USD/kg",
+       "currency": "USD",
+       "country": "USA",
+       "period_date": "2026-03-01",
+       "status": "verified",
+       "confidence": 0.95,
+       "flags": [
+        "country_from_digital_factory_default",
+        "period_from_release_metadata"
+       ],
+       "metric": "unit_cost:base",
+       "source_id": null,
+       "dataset_id": 214
+      },
+      "same_family": true,
+      "rid": "ri.emithran.main.material.340"
+     },
+     {
+      "id": 250,
+      "name": "Stainless Steel, A240",
+      "family": "stainless_steel",
+      "family_label": "Stainless steel",
+      "material_type": "Stainless Steel",
+      "grade": "A240",
+      "designations": {
+       "usa": "Stainless Steel, A240",
+       "din": "Stainless Steel, A240",
+       "en": "Stainless Steel, A240",
+       "gb": "Stainless Steel, A240",
+       "jis": "Stainless Steel, A240",
+       "source_name": "Generic Stainless Steel, A240",
+       "other_id": "Generic Stainless Steel, A240"
+      },
+      "cut_code": "5.21",
+      "density_kg_m3": 7800.0,
+      "original_names": [
+       "Stainless Steel, A240"
+      ],
+      "score": 0.785,
+      "factors": {
+       "cost": 0.6825694138386955,
+       "technical": 0.8872541730250367,
+       "availability": null,
+       "lead_time": null
+      },
+      "compared_properties": [
+       "density",
+       "uts",
+       "yield_strength"
+      ],
+      "price": {
+       "id": 1245,
+       "value_usd": 2.881,
+       "unit": "USD/kg",
+       "value": 2.881,
+       "unit_original": "USD / kg",
+       "currency": "USD",
+       "country": "USA",
+       "period_date": "2026-03-01",
+       "status": "verified",
+       "confidence": 0.95,
+       "flags": [
+        "country_from_digital_factory_default",
+        "period_from_release_metadata"
+       ],
+       "metric": "unit_cost:angle bar",
+       "source_id": null,
+       "dataset_id": 151
+      },
+      "same_family": true,
+      "rid": "ri.emithran.main.material.250"
+     },
+     {
+      "id": 243,
+      "name": "Stainless Steel, AISI 441",
+      "family": "stainless_steel",
+      "family_label": "Stainless steel",
+      "material_type": "Stainless Steel",
+      "grade": "AISI 441",
+      "designations": {
+       "usa": "Stainless Steel, AISI 441",
+       "din": "EN 1.4509",
+       "en": "Stainless Steel, AISI 441",
+       "gb": "Stainless Steel, AISI 441",
+       "jis": "Stainless Steel, AISI 441",
+       "source_name": "Generic Stainless Steel, AISI 441",
+       "other_id": "Generic Stainless Steel, AISI 441"
+      },
+      "cut_code": "5.21",
+      "density_kg_m3": 7700.0,
+      "original_names": [
+       "Stainless Steel, AISI 441"
+      ],
+      "score": 0.764,
+      "factors": {
+       "cost": 0.6440061701189952,
+       "technical": 0.8840172609643302,
+       "availability": null,
+       "lead_time": null
+      },
+      "compared_properties": [
+       "density",
+       "uts",
+       "yield_strength"
+      ],
+      "price": {
+       "id": 1149,
+       "value_usd": 3.231,
+       "unit": "USD/kg",
+       "value": 3.231,
+       "unit_original": "USD / kg",
+       "currency": "USD",
+       "country": "USA",
+       "period_date": "2026-03-01",
+       "status": "verified",
+       "confidence": 0.95,
+       "flags": [
+        "country_from_digital_factory_default",
+        "period_from_release_metadata"
+       ],
+       "metric": "unit_cost:angle bar",
+       "source_id": null,
+       "dataset_id": 151
+      },
+      "same_family": true,
+      "rid": "ri.emithran.main.material.243"
+     }
+    ],
+    "excluded": {
+     "different_family": 36
+    },
+    "notes": [
+     "Availability and lead time have no verified data source yet \u2014 their weights are redistributed.",
+     "Candidates come only from materials the taxonomy lists for this process.",
+     "Restricted to the same material family (set same_family=false to widen within the same material class)."
+    ]
+   }
+  },
+  "GET /api/v2/intelligence/categories/{category}/materialFamilies": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/intelligence/categories/die-casting/materialFamilies",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "category": {
+     "slug": "die-casting",
+     "name": "Die Casting"
+    },
+    "families": [
+     {
+      "family": "aluminium",
+      "label": "Aluminium",
+      "count": 42
+     },
+     {
+      "family": "brass_bronze",
+      "label": "Brass & bronze",
+      "count": 9
+     },
+     {
+      "family": "copper",
+      "label": "Copper",
+      "count": 6
+     }
+    ]
+   }
+  },
+  "GET /api/v2/orchestration/sources": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/orchestration/sources",
+    "query": {
+     "pageSize": 2
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": "eyJvIjogMn0",
+    "data": [
+     {
+      "rid": "ri.emithran.main.source.arxiv-manufacturing",
+      "slug": "arxiv-manufacturing",
+      "name": "arXiv \u2014 manufacturing / materials preprints",
+      "baseUrl": "https://export.arxiv.org/api/query",
+      "sourceType": "api",
+      "dataKinds": [
+       "publication"
+      ],
+      "license": "Metadata CC0; full text copyrighted (not fetched)",
+      "commercialUse": "yes",
+      "verificationStatus": "documented",
+      "status": "paused",
+      "freshness": "never",
+      "schedule": {
+       "cron": null,
+       "intervalMinutes": null
+      },
+      "lastSuccessAt": null,
+      "totalRecords": 0
+     },
+     {
+      "rid": "ri.emithran.main.source.bis-india-standards",
+      "slug": "bis-india-standards",
+      "name": "Bureau of Indian Standards \u2014 standards list",
+      "baseUrl": "https://www.services.bis.gov.in",
+      "sourceType": "html",
+      "dataKinds": [
+       "standard"
+      ],
+      "license": "Government of India website terms \u2014 to be confirmed",
+      "commercialUse": "unknown",
+      "verificationStatus": "planned",
+      "status": "paused",
+      "freshness": "n/a",
+      "schedule": {
+       "cron": null,
+       "intervalMinutes": null
+      },
+      "lastSuccessAt": null,
+      "totalRecords": 0
+     }
+    ]
+   }
+  },
+  "GET /api/v2/orchestration/sources/{source}": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/orchestration/sources/frankfurter-fx",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "rid": "ri.emithran.main.source.frankfurter-fx",
+    "slug": "frankfurter-fx",
+    "name": "Frankfurter \u2014 ECB reference exchange rates",
+    "baseUrl": "https://api.frankfurter.dev",
+    "sourceType": "api",
+    "dataKinds": [
+     "fx"
+    ],
+    "license": "Free incl. commercial use (Frankfurter terms); rates originate from ECB/central banks",
+    "commercialUse": "yes",
+    "verificationStatus": "verified",
+    "status": "active",
+    "freshness": "fresh",
+    "schedule": {
+     "cron": "20 15 * * 1-5",
+     "intervalMinutes": null
+    },
+    "lastSuccessAt": "2026-10-27T17:26:10.104892+00:00",
+    "totalRecords": 449
+   }
+  },
+  "GET /api/v2/orchestration/builds": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/orchestration/builds",
+    "query": {
+     "pageSize": 1
+    },
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "nextPageToken": "eyJvIjogMX0",
+    "data": [
+     {
+      "rid": "ri.emithran.main.build.4",
+      "source": "manufacturingdive-news",
+      "status": "SUCCEEDED",
+      "trigger": "manual",
+      "params": {},
+      "createdAt": "2026-10-27T17:26:11.800875+00:00",
+      "startedAt": "2026-10-27T17:26:11.806404+00:00",
+      "finishedAt": "2026-10-27T17:26:12.035159+00:00",
+      "cancelRequested": false,
+      "stats": {
+       "urls_discovered": 1,
+       "urls_queued": 1,
+       "pages_fetched": 1,
+       "pages_unchanged": 0,
+       "not_modified": 0,
+       "items_extracted": 5,
+       "items_stored": 5,
+       "items_revised": 0,
+       "items_duplicate": 0,
+       "items_quarantined": 0,
+       "items_invalid": 0,
+       "items_error": 0,
+       "requests_failed": 0,
+       "processing_errors": 0,
+       "retries": 0,
+       "urls_duplicate": 0,
+       "urls_over_budget": 0,
+       "urls_out_of_scope": 0,
+       "http_errors": 0,
+       "bytes": 2160
+      },
+      "error": null
+     }
+    ]
+   }
+  },
+  "GET /api/v2/meta/scopes": {
+   "request": {
+    "method": "GET",
+    "path": "/api/v2/meta/scopes",
+    "query": null,
+    "body": null
+   },
+   "status": 200,
+   "response": {
+    "data": [
+     {
+      "scope": "api:ontologies-read",
+      "description": "Read ontology metadata and objects (materials, machines, processes, categories, observations \u2026)"
+     },
+     {
+      "scope": "api:datasets-read",
+      "description": "Read imported datasets: metadata, schema, rows and original files"
+     },
+     {
+      "scope": "api:market-read",
+      "description": "Read market and material intelligence (FX, price series, benchmarks, alternatives)"
+     }
+    ]
+   }
+  },
+  "error": {
+   "status": 404,
+   "response": {
+    "errorCode": "NOT_FOUND",
+    "errorName": "ObjectNotFound",
+    "errorInstanceId": "15cb5626-6443-4434-9d6d-bae2679856ff",
+    "parameters": {
+     "objectType": "Material",
+     "primaryKey": "999999"
+    }
+   }
+  },
+  "POST /api/v2/oauth2/token": {
+   "request": {
+    "method": "POST",
+    "path": "/api/v2/oauth2/token",
+    "form": {
+     "grant_type": "client_credentials",
+     "client_id": "emc_\u2026",
+     "client_secret": "ems_\u2026",
+     "scope": "api:ontologies-read api:market-read"
+    }
+   },
+   "status": 200,
+   "response": {
+    "access_token": "emt_eyJjaWQiOi\u2026<redacted>",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "scope": "api:ontologies-read api:market-read"
+   }
+  }
+ }
+}

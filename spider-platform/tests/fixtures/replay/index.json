@@ -1,0 +1,27 @@
+{
+ "https://api.frankfurter.dev/v1/latest?base=USD": {
+  "file": "frankfurter_latest_usd.json",
+  "content_type": "application/json",
+  "captured_at": "2026-10-27T16:40:00Z",
+  "recorded_url": "https://api.frankfurter.dev/v1/latest?base=USD"
+ },
+ "https://api.frankfurter.dev/v1/2026-07-01..2026-10-27?base=USD": {
+  "file": "frankfurter_series_usd.json",
+  "content_type": "application/json",
+  "captured_at": "2026-10-27T16:40:00Z",
+  "recorded_url": "https://api.frankfurter.dev/v1/2026-07-01..?base=USD&symbols=INR,EUR,CNY,JPY,MXN"
+ },
+ "https://api.worldbank.org/v2/country/IND;CHN;USA;DEU;MEX;JPN;VNM;KOR/indicator/NV.IND.MANF.ZS?format=json&mrv=4&per_page=100": {
+  "file": "worldbank_NV.IND.MANF.ZS.json",
+  "content_type": "application/json",
+  "captured_at": "2026-10-27T16:45:00Z",
+  "recorded_url": "https://api.worldbank.org/v2/country/IND;CHN;USA;DEU;MEX;JPN;VNM;KOR/indicator/NV.IND.MANF.ZS?format=json&mrv=4&per_page=100"
+ },
+ "https://www.manufacturingdive.com/feeds/news/": {
+  "file": "manufacturingdive_news.xml",
+  "content_type": "application/rss+xml; charset=utf-8",
+  "captured_at": "2026-10-27T16:47:00Z",
+  "recorded_url": "https://www.manufacturingdive.com/feeds/news/",
+  "note": "headline/link/date of the first 5 items as captured; descriptions omitted"
+ }
+}

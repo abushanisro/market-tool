@@ -1,0 +1,21 @@
+# Verified on PyPI 2026-10-27 (licences in docs/SOURCES.md § Stack)
+scrapy==2.19.0
+scrapy-playwright==0.0.48        # only used for sources with render_js: true
+httpx==0.28.1
+lxml>=6.0,<7
+beautifulsoup4==4.15.0
+trafilatura>=2.0,<3              # Apache-2.0 from 1.8 onward (earlier releases were GPL)
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+sqlalchemy==2.1.6                # requires Python >= 3.11
+alembic>=1.14
+psycopg[binary]==3.3.6           # LGPL-3.0 (unmodified dependency)
+redis==8.1.0                     # optional at runtime
+apscheduler==3.11.3              # 4.x is still pre-release
+pydantic==2.14.1
+pydantic-settings>=2.6
+openpyxl==3.1.5
+pdfplumber==0.11.10
+pyyaml>=6.0
+python-dateutil>=2.9
+python-multipart>=0.0.20         # OAuth2 token endpoint (form encoding)

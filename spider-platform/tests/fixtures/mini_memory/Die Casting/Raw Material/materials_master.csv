@@ -1,0 +1,5 @@
+Name,Source Name,Unit Cost (USD/kg),Density (kg/m^3),Material Type,Can Die Cast,Cut Code
+Aluminum A380,Generic Aluminum A380,2.95,2740,Aluminum,TRUE,30.1
+Zinc Zamak 3,Generic Zamak 3,3.40,6600,Zinc-Aluminum,TRUE,12
+Magnesium AZ91D,Generic Magnesium AZ91D,2707,1800,Magnesium,TRUE,30.21
+Bad Row,,,,,,

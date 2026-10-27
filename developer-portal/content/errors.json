@@ -1,0 +1,149 @@
+{
+ "data": [
+  {
+   "errorName": "MissingCredentials",
+   "errorCode": "UNAUTHORIZED",
+   "description": "No Authorization header was provided."
+  },
+  {
+   "errorName": "InvalidToken",
+   "errorCode": "UNAUTHORIZED",
+   "description": "The bearer token is malformed, expired, revoked or has an invalid signature."
+  },
+  {
+   "errorName": "InvalidClientCredentials",
+   "errorCode": "UNAUTHORIZED",
+   "description": "client_id / client_secret do not match an active client."
+  },
+  {
+   "errorName": "MissingScope",
+   "errorCode": "PERMISSION_DENIED",
+   "description": "The token is valid but lacks a scope required by the endpoint."
+  },
+  {
+   "errorName": "InvalidScope",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "A requested scope is not granted to the client."
+  },
+  {
+   "errorName": "UnsupportedGrantType",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "Only grant_type=client_credentials is supported."
+  },
+  {
+   "errorName": "InvalidPageSize",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "Page sizes must be between 1 and the endpoint maximum."
+  },
+  {
+   "errorName": "InvalidPageToken",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "The page token could not be used to retrieve the next page."
+  },
+  {
+   "errorName": "InvalidRid",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "The resource identifier is not a valid ri.emithran.* RID for this resource type."
+  },
+  {
+   "errorName": "OntologyNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The ontology API name or RID does not exist."
+  },
+  {
+   "errorName": "ObjectTypeNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The object type API name does not exist."
+  },
+  {
+   "errorName": "ObjectNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "No object with the given primary key exists."
+  },
+  {
+   "errorName": "LinkTypeNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The object type has no link with this API name."
+  },
+  {
+   "errorName": "PropertiesNotFound",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "One or more referenced properties do not exist on the object type."
+  },
+  {
+   "errorName": "PropertyNotFilterable",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "Struct properties cannot be used in where, orderBy or groupBy."
+  },
+  {
+   "errorName": "InvalidQuery",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "The search or aggregation body is not a valid query."
+  },
+  {
+   "errorName": "DatasetNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The dataset RID does not exist."
+  },
+  {
+   "errorName": "ColumnsNotFound",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "Requested columns do not exist in the dataset."
+  },
+  {
+   "errorName": "FileNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The dataset's original file is not present on the server."
+  },
+  {
+   "errorName": "MaterialNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The material RID does not exist."
+  },
+  {
+   "errorName": "SourceNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The source does not exist."
+  },
+  {
+   "errorName": "BuildNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The build (crawl job) does not exist."
+  },
+  {
+   "errorName": "BuildNotPermitted",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "The source cannot be crawled (planned, blocked by terms, disabled, already running)."
+  },
+  {
+   "errorName": "ApiFeaturePreviewUsageOnly",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "This endpoint is in preview; call it with the query parameter preview=true."
+  },
+  {
+   "errorName": "RateLimitExceeded",
+   "errorCode": "TOO_MANY_REQUESTS",
+   "description": "The per-minute request budget of the client or key is exhausted. Retry after X-RateLimit-Reset."
+  },
+  {
+   "errorName": "ClientNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The API client does not exist."
+  },
+  {
+   "errorName": "ApiKeyNotFound",
+   "errorCode": "NOT_FOUND",
+   "description": "The API key does not exist."
+  },
+  {
+   "errorName": "InvalidArgument",
+   "errorCode": "INVALID_ARGUMENT",
+   "description": "A request parameter failed validation; see parameters."
+  },
+  {
+   "errorName": "Internal",
+   "errorCode": "INTERNAL",
+   "description": "Unexpected server error. Quote errorInstanceId to support."
+  }
+ ]
+}

@@ -1,0 +1,1541 @@
+{
+ "objectTypes": [
+  {
+   "apiName": "ManufacturingCategory",
+   "displayName": "Manufacturing category",
+   "pluralDisplayName": "Manufacturing categories",
+   "description": "One per folder of the existing taxonomy. `originalFolder` keeps the folder name exactly as on disk.",
+   "primaryKey": "slug",
+   "titleProperty": "name",
+   "rid": "ri.emithran.main.object-type.ManufacturingCategory",
+   "status": "ACTIVE",
+   "properties": {
+    "slug": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Normalized identifier, e.g. `die-casting`.",
+     "filterable": true
+    },
+    "name": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Canonical display name.",
+     "filterable": true
+    },
+    "originalFolder": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Folder name exactly as in memory/ (spelling preserved).",
+     "filterable": true
+    },
+    "treeNodeName": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Matching node in digital_factory_tree.csv, if any.",
+     "filterable": true
+    },
+    "family": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Category family: casting, sheet_metal, machining, plastics \u2026",
+     "filterable": true
+    },
+    "parentId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Internal id of the parent category (e.g. sand-casting \u2192 casting).",
+     "filterable": true
+    },
+    "datasetCount": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Number of imported files/sheets.",
+     "filterable": true
+    },
+    "rowCount": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Rows preserved across those files.",
+     "filterable": true
+    }
+   },
+   "links": [
+    {
+     "apiName": "datasets",
+     "objectTypeApiName": "Dataset",
+     "cardinality": "MANY",
+     "description": "Files imported from this folder."
+    },
+    {
+     "apiName": "materials",
+     "objectTypeApiName": "Material",
+     "cardinality": "MANY",
+     "description": "Materials listed in this category's material files."
+    },
+    {
+     "apiName": "machines",
+     "objectTypeApiName": "Machine",
+     "cardinality": "MANY",
+     "description": "Machines / work centers."
+    },
+    {
+     "apiName": "processes",
+     "objectTypeApiName": "Process",
+     "cardinality": "MANY",
+     "description": "Processes and operations."
+    },
+    {
+     "apiName": "subcategories",
+     "objectTypeApiName": "ManufacturingCategory",
+     "cardinality": "MANY",
+     "description": "Child categories."
+    }
+   ]
+  },
+  {
+   "apiName": "TaxonomyNode",
+   "displayName": "Taxonomy node",
+   "pluralDisplayName": "Taxonomy nodes",
+   "description": "Verbatim rows of digital_factory_tree.csv.",
+   "primaryKey": "id",
+   "titleProperty": "name",
+   "rid": "ri.emithran.main.object-type.TaxonomyNode",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Row number.",
+     "filterable": true
+    },
+    "level": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Tree depth (0 = root).",
+     "filterable": true
+    },
+    "parentName": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Parent node name.",
+     "filterable": true
+    },
+    "name": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Node name.",
+     "filterable": true
+    },
+    "nodeType": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Folder or Document.",
+     "filterable": true
+    },
+    "categoryId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Mapped manufacturing category id, if any.",
+     "filterable": true
+    }
+   },
+   "links": []
+  },
+  {
+   "apiName": "Dataset",
+   "displayName": "Dataset",
+   "pluralDisplayName": "Datasets",
+   "description": "An imported file (or spreadsheet tab) from memory/. Rows are readable through the Datasets API.",
+   "primaryKey": "id",
+   "titleProperty": "relPath",
+   "rid": "ri.emithran.main.object-type.Dataset",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Dataset id (also in its RID).",
+     "filterable": true
+    },
+    "relPath": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Path relative to memory/, `#Sheet` suffix for XLSX tabs.",
+     "filterable": true
+    },
+    "fileType": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "csv, json, xlsx, md, pdf \u2026",
+     "filterable": true
+    },
+    "role": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Inferred role: materials, machines, processes, operations, lookup, variables \u2026",
+     "filterable": true
+    },
+    "countryIso3": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Country inferred from the path (Indian data \u2192 IND).",
+     "filterable": true
+    },
+    "columns": {
+     "dataType": {
+      "type": "array"
+     },
+     "description": "Column names exactly as in the file.",
+     "filterable": true
+    },
+    "rowCount": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Rows imported.",
+     "filterable": true
+    },
+    "checksum": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "SHA-256 of the file.",
+     "filterable": true
+    },
+    "sizeBytes": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "File size.",
+     "filterable": true
+    },
+    "importedAt": {
+     "dataType": {
+      "type": "timestamp"
+     },
+     "description": "Last import time.",
+     "filterable": true
+    },
+    "categoryId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Owning category id.",
+     "filterable": true
+    }
+   },
+   "links": [
+    {
+     "apiName": "category",
+     "objectTypeApiName": "ManufacturingCategory",
+     "cardinality": "ONE",
+     "description": "Folder category."
+    },
+    {
+     "apiName": "observations",
+     "objectTypeApiName": "Observation",
+     "cardinality": "MANY",
+     "description": "Observations derived from this file."
+    }
+   ]
+  },
+  {
+   "apiName": "Material",
+   "displayName": "Material",
+   "pluralDisplayName": "Materials",
+   "description": "Deduplicated raw material / grade with designations and technical properties as reported by the source files.",
+   "primaryKey": "id",
+   "titleProperty": "name",
+   "rid": "ri.emithran.main.object-type.Material",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Material id.",
+     "filterable": true
+    },
+    "name": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Display name (original casing).",
+     "filterable": true
+    },
+    "key": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Normalized identity key.",
+     "filterable": true
+    },
+    "family": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Normalized family: steel, stainless_steel, aluminium, thermoplastic \u2026",
+     "filterable": true
+    },
+    "materialType": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Material Type as written in the source.",
+     "filterable": true
+    },
+    "grade": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Grade parsed from the name (e.g. AISI 304, ANSI 6061).",
+     "filterable": true
+    },
+    "cutCode": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Cut code from the source.",
+     "filterable": true
+    },
+    "densityKgM3": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "Density in kg/m\u00b3.",
+     "filterable": true
+    },
+    "designations": {
+     "dataType": {
+      "type": "struct"
+     },
+     "description": "usa / din / en / gb / jis / european designations.",
+     "filterable": false
+    },
+    "technicalProperties": {
+     "dataType": {
+      "type": "struct"
+     },
+     "description": "Normalized property \u2192 {value, unit, original_header}.",
+     "filterable": false
+    },
+    "originalNames": {
+     "dataType": {
+      "type": "array"
+     },
+     "description": "Every spelling seen across files.",
+     "filterable": true
+    }
+   },
+   "links": [
+    {
+     "apiName": "categories",
+     "objectTypeApiName": "ManufacturingCategory",
+     "cardinality": "MANY",
+     "description": "Processes whose material lists include this material."
+    },
+    {
+     "apiName": "observations",
+     "objectTypeApiName": "Observation",
+     "cardinality": "MANY",
+     "description": "Price and property observations."
+    }
+   ]
+  },
+  {
+   "apiName": "Machine",
+   "displayName": "Machine",
+   "pluralDisplayName": "Machines",
+   "description": "Machine / work-center record with labour and overhead rates. `attributes` holds every original column, including identifiers such as MHR/LHR fields under their original names (not interpreted).",
+   "primaryKey": "id",
+   "titleProperty": "name",
+   "rid": "ri.emithran.main.object-type.Machine",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Machine id.",
+     "filterable": true
+    },
+    "name": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Machine / work center name.",
+     "filterable": true
+    },
+    "processName": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Process / commodity group from the source.",
+     "filterable": true
+    },
+    "countryIso3": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Country or region code (XWE, XEE for regions).",
+     "filterable": true
+    },
+    "laborRateUsdHr": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "Labour rate, USD/h, as given.",
+     "filterable": true
+    },
+    "directOverheadUsdHr": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "Direct overhead, USD/h.",
+     "filterable": true
+    },
+    "indirectOverheadUsdHr": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "Indirect overhead, USD/h.",
+     "filterable": true
+    },
+    "categoryId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Category id.",
+     "filterable": true
+    },
+    "datasetId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Source dataset id.",
+     "filterable": true
+    },
+    "attributes": {
+     "dataType": {
+      "type": "struct"
+     },
+     "description": "All original columns and values.",
+     "filterable": false
+    }
+   },
+   "links": [
+    {
+     "apiName": "category",
+     "objectTypeApiName": "ManufacturingCategory",
+     "cardinality": "ONE",
+     "description": "Category."
+    },
+    {
+     "apiName": "dataset",
+     "objectTypeApiName": "Dataset",
+     "cardinality": "ONE",
+     "description": "Source file."
+    }
+   ]
+  },
+  {
+   "apiName": "Process",
+   "displayName": "Process",
+   "pluralDisplayName": "Processes",
+   "description": "Process or operation listed in a category's process files.",
+   "primaryKey": "id",
+   "titleProperty": "name",
+   "rid": "ri.emithran.main.object-type.Process",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Process id.",
+     "filterable": true
+    },
+    "name": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Process name as written.",
+     "filterable": true
+    },
+    "normalizedName": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Lower-case normalized name.",
+     "filterable": true
+    },
+    "defaultMachine": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Default machine, if given.",
+     "filterable": true
+    },
+    "categoryId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Category id.",
+     "filterable": true
+    },
+    "attributes": {
+     "dataType": {
+      "type": "struct"
+     },
+     "description": "kinds (process/operation), datasets.",
+     "filterable": false
+    }
+   },
+   "links": [
+    {
+     "apiName": "category",
+     "objectTypeApiName": "ManufacturingCategory",
+     "cardinality": "ONE",
+     "description": "Category."
+    }
+   ]
+  },
+  {
+   "apiName": "Observation",
+   "displayName": "Observation",
+   "pluralDisplayName": "Observations",
+   "description": "One normalized fact (price, FX rate, indicator, trade value \u2026) with original value/unit, provenance and quality status.",
+   "primaryKey": "id",
+   "titleProperty": "entity",
+   "rid": "ri.emithran.main.object-type.Observation",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Observation id.",
+     "filterable": true
+    },
+    "kind": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "price | fx | indicator | trade | labor_rate | machine_rate | property",
+     "filterable": true
+    },
+    "entity": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Original entity label (material name, currency pair \u2026).",
+     "filterable": true
+    },
+    "metric": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Metric, e.g. unit_cost:base, exchange_rate.",
+     "filterable": true
+    },
+    "value": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "Original numeric value.",
+     "filterable": true
+    },
+    "valueText": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Original non-numeric value.",
+     "filterable": true
+    },
+    "unit": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Original unit.",
+     "filterable": true
+    },
+    "currency": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Original currency.",
+     "filterable": true
+    },
+    "valueUsd": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "Normalized value (USD per normalized unit).",
+     "filterable": true
+    },
+    "unitNormalized": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "USD/kg, USD/hr, USD/m2 \u2026",
+     "filterable": true
+    },
+    "countryIso3": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Country / region.",
+     "filterable": true
+    },
+    "periodDate": {
+     "dataType": {
+      "type": "date"
+     },
+     "description": "Date the value refers to (null if the source does not say).",
+     "filterable": true
+    },
+    "observedAt": {
+     "dataType": {
+      "type": "timestamp"
+     },
+     "description": "Extraction timestamp.",
+     "filterable": true
+    },
+    "status": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "verified | unverified | quarantined | superseded",
+     "filterable": true
+    },
+    "confidence": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "0\u20131 confidence after quality rules.",
+     "filterable": true
+    },
+    "qualityFlags": {
+     "dataType": {
+      "type": "array"
+     },
+     "description": "e.g. replayed, as_of_unknown, fx_fallback_internal_table.",
+     "filterable": true
+    },
+    "seriesKey": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Stable key for history.",
+     "filterable": true
+    },
+    "sourceId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Crawled source id (null = internal taxonomy).",
+     "filterable": true
+    },
+    "datasetId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Dataset id for internal records.",
+     "filterable": true
+    },
+    "materialId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Material id.",
+     "filterable": true
+    },
+    "categoryId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Category id.",
+     "filterable": true
+    },
+    "sourceUrl": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Exact URL fetched.",
+     "filterable": true
+    },
+    "original": {
+     "dataType": {
+      "type": "struct"
+     },
+     "description": "Original record / cell reference and conversion details.",
+     "filterable": false
+    }
+   },
+   "links": [
+    {
+     "apiName": "material",
+     "objectTypeApiName": "Material",
+     "cardinality": "ONE",
+     "description": "Material."
+    },
+    {
+     "apiName": "dataset",
+     "objectTypeApiName": "Dataset",
+     "cardinality": "ONE",
+     "description": "Source file."
+    },
+    {
+     "apiName": "source",
+     "objectTypeApiName": "Source",
+     "cardinality": "ONE",
+     "description": "Crawled source."
+    },
+    {
+     "apiName": "qualityIssues",
+     "objectTypeApiName": "QualityIssue",
+     "cardinality": "MANY",
+     "description": "Validation findings."
+    }
+   ]
+  },
+  {
+   "apiName": "Country",
+   "displayName": "Country",
+   "pluralDisplayName": "Countries",
+   "description": "Countries and regions used across the data (regions use X-prefixed codes).",
+   "primaryKey": "iso3",
+   "titleProperty": "name",
+   "rid": "ri.emithran.main.object-type.Country",
+   "status": "ACTIVE",
+   "properties": {
+    "iso3": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "ISO 3166-1 alpha-3 (or XWE / XEE / WLD).",
+     "filterable": true
+    },
+    "iso2": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Alpha-2.",
+     "filterable": true
+    },
+    "name": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Name.",
+     "filterable": true
+    },
+    "currency": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "ISO 4217 currency.",
+     "filterable": true
+    },
+    "region": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Region.",
+     "filterable": true
+    },
+    "isRegion": {
+     "dataType": {
+      "type": "boolean"
+     },
+     "description": "True for aggregate regions.",
+     "filterable": true
+    }
+   },
+   "links": [
+    {
+     "apiName": "machines",
+     "objectTypeApiName": "Machine",
+     "cardinality": "MANY",
+     "description": "Machine records for the country."
+    },
+    {
+     "apiName": "observations",
+     "objectTypeApiName": "Observation",
+     "cardinality": "MANY",
+     "description": "Observations for the country."
+    }
+   ]
+  },
+  {
+   "apiName": "Source",
+   "displayName": "Source",
+   "pluralDisplayName": "Sources",
+   "description": "Registered external data source with licensing and verification metadata.",
+   "primaryKey": "slug",
+   "titleProperty": "name",
+   "rid": "ri.emithran.main.object-type.Source",
+   "status": "ACTIVE",
+   "properties": {
+    "slug": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Identifier.",
+     "filterable": true
+    },
+    "name": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Name.",
+     "filterable": true
+    },
+    "baseUrl": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Base URL.",
+     "filterable": true
+    },
+    "sourceType": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "api | html | sitemap | rss | csv | xlsx | pdf | internal",
+     "filterable": true
+    },
+    "websiteCategory": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "government, intergovernmental, research \u2026",
+     "filterable": true
+    },
+    "dataKinds": {
+     "dataType": {
+      "type": "array"
+     },
+     "description": "Kinds of data produced.",
+     "filterable": true
+    },
+    "categories": {
+     "dataType": {
+      "type": "array"
+     },
+     "description": "Category slugs ('*' = all).",
+     "filterable": true
+    },
+    "countries": {
+     "dataType": {
+      "type": "array"
+     },
+     "description": "Countries covered.",
+     "filterable": true
+    },
+    "license": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Licence.",
+     "filterable": true
+    },
+    "commercialUse": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "yes | no | conditional | unknown",
+     "filterable": true
+    },
+    "attribution": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Required attribution text.",
+     "filterable": true
+    },
+    "verificationStatus": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "verified | url_verified | documented | key_required | planned | blocked_by_terms",
+     "filterable": true
+    },
+    "verifiedAt": {
+     "dataType": {
+      "type": "date"
+     },
+     "description": "Verification date.",
+     "filterable": true
+    },
+    "updateFrequency": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Publisher update frequency.",
+     "filterable": true
+    },
+    "reliability": {
+     "dataType": {
+      "type": "double"
+     },
+     "description": "0\u20131 reliability score.",
+     "filterable": true
+    },
+    "status": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "active | paused | disabled",
+     "filterable": true
+    },
+    "lastSuccessAt": {
+     "dataType": {
+      "type": "timestamp"
+     },
+     "description": "Last successful build.",
+     "filterable": true
+    },
+    "totalRecords": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Records stored.",
+     "filterable": true
+    }
+   },
+   "links": [
+    {
+     "apiName": "observations",
+     "objectTypeApiName": "Observation",
+     "cardinality": "MANY",
+     "description": "Observations from this source."
+    },
+    {
+     "apiName": "documents",
+     "objectTypeApiName": "Document",
+     "cardinality": "MANY",
+     "description": "Documents from this source."
+    }
+   ]
+  },
+  {
+   "apiName": "Standard",
+   "displayName": "Standard",
+   "pluralDisplayName": "Standards",
+   "description": "Standards metadata from taxonomy files and standards sources.",
+   "primaryKey": "id",
+   "titleProperty": "code",
+   "rid": "ri.emithran.main.object-type.Standard",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Id.",
+     "filterable": true
+    },
+    "code": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "e.g. ISO 286.",
+     "filterable": true
+    },
+    "body": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "ISO, ASTM, BIS \u2026",
+     "filterable": true
+    },
+    "title": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Title.",
+     "filterable": true
+    },
+    "status": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Publication status.",
+     "filterable": true
+    },
+    "url": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Link.",
+     "filterable": true
+    }
+   },
+   "links": []
+  },
+  {
+   "apiName": "Document",
+   "displayName": "Document",
+   "pluralDisplayName": "Documents",
+   "description": "Publications, news and reports (metadata; text only where licensing allows).",
+   "primaryKey": "id",
+   "titleProperty": "title",
+   "rid": "ri.emithran.main.object-type.Document",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Id.",
+     "filterable": true
+    },
+    "kind": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "publication | news | report",
+     "filterable": true
+    },
+    "title": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Title.",
+     "filterable": true
+    },
+    "url": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Canonical URL.",
+     "filterable": true
+    },
+    "publishedAt": {
+     "dataType": {
+      "type": "timestamp"
+     },
+     "description": "Publication time.",
+     "filterable": true
+    },
+    "authors": {
+     "dataType": {
+      "type": "array"
+     },
+     "description": "Authors.",
+     "filterable": true
+    },
+    "doi": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "DOI.",
+     "filterable": true
+    },
+    "license": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Licence.",
+     "filterable": true
+    },
+    "sourceId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Source id.",
+     "filterable": true
+    }
+   },
+   "links": []
+  },
+  {
+   "apiName": "UnresolvedIdentifier",
+   "displayName": "Unresolved identifier",
+   "pluralDisplayName": "Unresolved identifiers",
+   "description": "Internal identifiers (MHR, LHR) kept uninterpreted until an owner confirms a definition.",
+   "primaryKey": "code",
+   "titleProperty": "code",
+   "rid": "ri.emithran.main.object-type.UnresolvedIdentifier",
+   "status": "ACTIVE",
+   "properties": {
+    "code": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "MHR or LHR.",
+     "filterable": true
+    },
+    "status": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "unresolved | confirmed",
+     "filterable": true
+    },
+    "occurrences": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Occurrences across memory/.",
+     "filterable": true
+    },
+    "confirmedDefinition": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Definition, once confirmed.",
+     "filterable": true
+    },
+    "evidence": {
+     "dataType": {
+      "type": "struct"
+     },
+     "description": "File + context snippets.",
+     "filterable": false
+    }
+   },
+   "links": []
+  },
+  {
+   "apiName": "QualityIssue",
+   "displayName": "Quality issue",
+   "pluralDisplayName": "Quality issues",
+   "description": "Validation and import findings.",
+   "primaryKey": "id",
+   "titleProperty": "code",
+   "rid": "ri.emithran.main.object-type.QualityIssue",
+   "status": "ACTIVE",
+   "properties": {
+    "id": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Id.",
+     "filterable": true
+    },
+    "severity": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "info | warning | error",
+     "filterable": true
+    },
+    "code": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "e.g. unit_unknown, implausible_price.",
+     "filterable": true
+    },
+    "message": {
+     "dataType": {
+      "type": "string"
+     },
+     "description": "Message.",
+     "filterable": true
+    },
+    "createdAt": {
+     "dataType": {
+      "type": "timestamp"
+     },
+     "description": "When found.",
+     "filterable": true
+    },
+    "datasetId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Dataset id.",
+     "filterable": true
+    },
+    "observationId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Observation id.",
+     "filterable": true
+    },
+    "sourceId": {
+     "dataType": {
+      "type": "integer"
+     },
+     "description": "Source id.",
+     "filterable": true
+    },
+    "context": {
+     "dataType": {
+      "type": "struct"
+     },
+     "description": "Details.",
+     "filterable": false
+    }
+   },
+   "links": []
+  }
+ ],
+ "counts": {
+  "ManufacturingCategory": 34,
+  "TaxonomyNode": 44,
+  "Dataset": 1223,
+  "Material": 1318,
+  "Machine": 65380,
+  "Process": 3379,
+  "Observation": 12562,
+  "Country": 32,
+  "Source": 24,
+  "Standard": 2,
+  "Document": 5,
+  "UnresolvedIdentifier": 2,
+  "QualityIssue": 3226
+ },
+ "samples": {
+  "ManufacturingCategory": [
+   {
+    "__apiName": "ManufacturingCategory",
+    "__primaryKey": "additive-manufacturing",
+    "__rid": "ri.emithran.main.category.2",
+    "__title": "Additive Manufacturing",
+    "slug": "additive-manufacturing",
+    "name": "Additive Manufacturing",
+    "originalFolder": "Additive Manufacturing",
+    "treeNodeName": "Additive Manufacturing",
+    "family": "additive",
+    "parentId": null,
+    "datasetCount": 26,
+    "rowCount": 2098
+   }
+  ],
+  "TaxonomyNode": [
+   {
+    "__apiName": "TaxonomyNode",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.taxonomy-node.1",
+    "__title": "aPriori USA (aP2025R1_SP03_F01_(2026-03))",
+    "id": 1,
+    "level": 0,
+    "parentName": null,
+    "name": "aPriori USA (aP2025R1_SP03_F01_(2026-03))",
+    "nodeType": "Folder",
+    "categoryId": null
+   }
+  ],
+  "Dataset": [
+   {
+    "__apiName": "Dataset",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.dataset.1",
+    "__title": "exchange_rate_table.csv",
+    "id": 1,
+    "relPath": "exchange_rate_table.csv",
+    "fileType": "csv",
+    "role": "fx_table",
+    "countryIso3": null,
+    "columns": [],
+    "rowCount": 0,
+    "checksum": "b8db89a2b3fb572d32247206ba170b73f2ffbe2ab5a658e3a6f5f882c9088385",
+    "sizeBytes": 1088,
+    "importedAt": "2026-10-27T17:26:12.660160+00:00",
+    "categoryId": null
+   }
+  ],
+  "Material": [
+   {
+    "__apiName": "Material",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.material.1",
+    "__title": "Accura 10",
+    "id": 1,
+    "name": "Accura 10",
+    "key": "accura 10",
+    "family": "additive_polymer",
+    "materialType": "Accura",
+    "grade": null,
+    "cutCode": "51.31",
+    "densityKgM3": 1210.0,
+    "designations": {
+     "source_name": "Generic Accura 10"
+    },
+    "technicalProperties": {
+     "density": {
+      "value": 1210.0,
+      "unit": "kg/m3",
+      "original_header": "Density (kg / m^3)"
+     },
+     "hardness": {
+      "value": 30.0,
+      "unit": "as-reported",
+      "original_header": "Hardness"
+     },
+     "hardness_system": {
+      "value": "Brinell",
+      "unit": "-",
+      "original_header": "Hardness System"
+     },
+     "milling_speed": {
+      "value": 0.0,
+      "unit": "m/min",
+      "original_header": "Milling Speed (m / min)"
+     }
+    },
+    "originalNames": [
+     "Accura 10"
+    ]
+   }
+  ],
+  "Machine": [
+   {
+    "__apiName": "Machine",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.machine.1",
+    "__title": "Electric Trolley Loader - 2m Lift Height",
+    "id": 1,
+    "name": "Electric Trolley Loader - 2m Lift Height",
+    "processName": "Powder Loading",
+    "countryIso3": "USA",
+    "laborRateUsdHr": 38.94,
+    "directOverheadUsdHr": 0.28,
+    "indirectOverheadUsdHr": 13.87,
+    "categoryId": 2,
+    "datasetId": 12,
+    "attributes": {
+     "Process": "Powder Loading",
+     "Name": "Electric Trolley Loader - 2m Lift Height",
+     "Labor Rate (USD / hr)": "38.94",
+     "Direct Overhead Rate (USD / hr)": "0.28",
+     "Indirect Overhead Rate (USD / hr)": "13.87",
+     "Overhead Multiplier": "0.00",
+     "Number of Operators": "1.00",
+     "Labor Time Standard": "1.00",
+     "Work Center Labor Rate Factor": "1.00",
+     "Setup Time (hr)": "0.00",
+     "Is Preferred": "true",
+     "Avg Utilization": "0.00",
+     "Good Part Yield": "1.00",
+     "Machine Price (USD)": "5190.00",
+     "Machine Length (mm)": "525.00",
+     "Machine Width (mm)": "800.00",
+     "Footprint Allowance Factor": "1.00",
+     "Machine Power (kW)": "0.00",
+     "Installation Factor (%)": "0",
+     "Machine Uptime (%)": "80",
+     "Annual Maintenance Factor (%)": "5",
+     "Machine Life (yr)": "10.00",
+     "Salvage Value Factor (%)": "0",
+     "Supplies Cost (USD / yr)": "0.00",
+     "Machine Manufacturer Location": "USA",
+     "Data Source": "aPriori Baseline"
+    }
+   }
+  ],
+  "Process": [
+   {
+    "__apiName": "Process",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.process.1",
+    "__title": "Source Component:As Supplied//CurvedSurface",
+    "id": 1,
+    "name": "Source Component:As Supplied//CurvedSurface",
+    "normalizedName": "source component as supplied curvedsurface",
+    "defaultMachine": null,
+    "categoryId": 1,
+    "attributes": {
+     "kinds": [
+      "operation"
+     ],
+     "datasets": [
+      "2 Mold Molding/operations (1).csv"
+     ]
+    }
+   }
+  ],
+  "Observation": [
+   {
+    "__apiName": "Observation",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.observation.1",
+    "__title": "USD/AUD",
+    "id": 1,
+    "kind": "fx",
+    "entity": "USD/AUD",
+    "metric": "exchange_rate",
+    "value": 1.4221,
+    "valueText": null,
+    "unit": "AUD per USD",
+    "currency": "AUD",
+    "valueUsd": 1.4221,
+    "unitNormalized": "AUD per USD",
+    "countryIso3": null,
+    "periodDate": "2026-10-27",
+    "observedAt": "2026-10-27T17:26:08.345355+00:00",
+    "status": "verified",
+    "confidence": 0.95,
+    "qualityFlags": [
+     "replayed"
+    ],
+    "seriesKey": "src:frankfurter-fx|fx|usd/aud|exchange_rate|-",
+    "sourceId": 1,
+    "datasetId": null,
+    "materialId": null,
+    "categoryId": null,
+    "sourceUrl": "https://api.frankfurter.dev/v1/latest?base=USD",
+    "original": {
+     "base": "USD",
+     "date": "2026-10-27",
+     "currency": "AUD",
+     "rate": 1.4221,
+     "replay": {
+      "captured_at": "2026-10-27T16:40:00Z",
+      "recorded_url": "https://api.frankfurter.dev/v1/latest?base=USD"
+     }
+    }
+   }
+  ],
+  "Country": [
+   {
+    "__apiName": "Country",
+    "__primaryKey": "AUS",
+    "__rid": "ri.emithran.main.country.AUS",
+    "__title": "Australia",
+    "iso3": "AUS",
+    "iso2": "AU",
+    "name": "Australia",
+    "currency": "AUD",
+    "region": "Oceania",
+    "isRegion": false
+   }
+  ],
+  "Source": [
+   {
+    "__apiName": "Source",
+    "__primaryKey": "arxiv-manufacturing",
+    "__rid": "ri.emithran.main.source.11",
+    "__title": "arXiv \u2014 manufacturing / materials preprints",
+    "slug": "arxiv-manufacturing",
+    "name": "arXiv \u2014 manufacturing / materials preprints",
+    "baseUrl": "https://export.arxiv.org/api/query",
+    "sourceType": "api",
+    "websiteCategory": "research",
+    "dataKinds": [
+     "publication"
+    ],
+    "categories": [
+     "additive-manufacturing",
+     "composites",
+     "electronics"
+    ],
+    "countries": [],
+    "license": "Metadata CC0; full text copyrighted (not fetched)",
+    "commercialUse": "yes",
+    "attribution": null,
+    "verificationStatus": "documented",
+    "verifiedAt": null,
+    "updateFrequency": null,
+    "reliability": 0.5,
+    "status": "paused",
+    "lastSuccessAt": null,
+    "totalRecords": 0
+   }
+  ],
+  "Standard": [
+   {
+    "__apiName": "Standard",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.standard.1",
+    "__title": "ISO 286-1:2010",
+    "id": 1,
+    "code": "ISO 286-1:2010",
+    "body": "ISO",
+    "title": null,
+    "status": null,
+    "url": null
+   }
+  ],
+  "Document": [
+   {
+    "__apiName": "Document",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.document.1",
+    "__title": "Carrier Global to spend more than $600M on campus in Fort Worth, Texas",
+    "id": 1,
+    "kind": "news",
+    "title": "Carrier Global to spend more than $600M on campus in Fort Worth, Texas",
+    "url": "https://www.manufacturingdive.com/news/carrier-600m-ft-worth-manufacturing-campus-HVAC/872800/",
+    "publishedAt": "2026-10-27T15:57:37+00:00",
+    "authors": [],
+    "doi": null,
+    "license": null,
+    "sourceId": 12
+   }
+  ],
+  "UnresolvedIdentifier": [
+   {
+    "__apiName": "UnresolvedIdentifier",
+    "__primaryKey": "LHR",
+    "__rid": "ri.emithran.main.identifier.2",
+    "__title": "LHR",
+    "code": "LHR",
+    "status": "unresolved",
+    "occurrences": 68,
+    "confirmedDefinition": null,
+    "evidence": [
+     {
+      "file": "Sheetmetal/Sheet-Metal-Nesting-Costing-Report.md",
+      "context": " | | CK45 | 0.93 | | St37-2 / S235 JR | 0.98 | **Machine Hour Rates (LHR = Labor Hour Rate, MHR = Machine Hour Rate)** | Process | Machine | F"
+     },
+     {
+      "file": "Sheetmetal/Sheet-Metal-Nesting-Costing-Report.md",
+      "context": " Labor Hour Rate, MHR = Machine Hour Rate)** | Process | Machine | FR LHR | FR MHR | EE LHR | EE MHR | |---|---|---|---|---|---| | Laser Cut | "
+     },
+     {
+      "file": "Sheetmetal/Sheet-Metal-Nesting-Costing-Report.md",
+      "context": "MHR = Machine Hour Rate)** | Process | Machine | FR LHR | FR MHR | EE LHR | EE MHR | |---|---|---|---|---|---| | Laser Cut | Amada FOL-3015 AJ "
+     }
+    ]
+   }
+  ],
+  "QualityIssue": [
+   {
+    "__apiName": "QualityIssue",
+    "__primaryKey": 1,
+    "__rid": "ri.emithran.main.quality-issue.1",
+    "__title": "implausible_price",
+    "id": 1,
+    "severity": "error",
+    "code": "implausible_price",
+    "message": "166.2 USD/kg outside plausible band 0.3-150 for aluminium",
+    "createdAt": "2026-10-27T17:26:16.424886+00:00",
+    "datasetId": 278,
+    "observationId": 2500,
+    "sourceId": null,
+    "context": {
+     "entity": "Aluminum - Honeycomb Core - 1/8in Cell",
+     "metric": "unit_cost:base",
+     "value": "166.18",
+     "unit": "USD / kg",
+     "url": null
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,3 @@
+version,baseCurrency,active,currencyCode,description,rate,conversion,lastModifiedBy,lastModifiedTime
+Default,USD,False,INR,Indian Rupee,64.3455,1 USD = 64.3455 INR,admin,12/11/17 7:00 AM
+Default,USD,True,EUR,Euro,0.8464,1 USD = 0.8464 EUR,fernando.sanchez,1/6/26 2:28 PM

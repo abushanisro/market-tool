@@ -1,0 +1,53 @@
+# docker compose up -d   →  UI/API on http://localhost:8000
+# The existing taxonomy folder (../memory) is mounted read-only and imported by the `importer` job.
+services:
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: mip, POSTGRES_PASSWORD: mip, POSTGRES_DB: mip }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U mip"], interval: 5s, retries: 20 }
+
+  redis:
+    image: redis:7-alpine
+
+  api:
+    build: .
+    env_file: [{ path: .env, required: false }]
+    environment:
+      MIP_DATABASE_URL: postgresql+psycopg://mip:mip@db/mip
+      MIP_REDIS_URL: redis://redis:6379/0
+      MIP_DATA_ROOT: /data/memory
+    volumes: ["../memory:/data/memory:ro"]
+    ports: ["8000:8000"]
+    depends_on: { db: { condition: service_healthy }, redis: { condition: service_started } }
+
+  worker:
+    build: .
+    env_file: [{ path: .env, required: false }]
+    command: ["sh", "-c", "sleep 8 && python -m mip.cli worker"]
+    environment:
+      MIP_DATABASE_URL: postgresql+psycopg://mip:mip@db/mip
+      MIP_REDIS_URL: redis://redis:6379/0
+      MIP_DATA_ROOT: /data/memory
+    volumes: ["../memory:/data/memory:ro", "jobs:/app/var/jobs"]
+    depends_on: [api]
+
+  portal:     # Next.js developer portal → http://localhost:3000
+    build:
+      context: ../developer-portal
+      args: { NEXT_PUBLIC_API_BASE_URL: "http://localhost:8000" }
+    environment: { MIP_API_URL: "http://api:8000" }
+    ports: ["3000:3000"]
+    depends_on: [api]
+
+  importer:   # one-off: docker compose run --rm importer
+    build: .
+    profiles: ["tools"]
+    command: ["python", "-m", "mip.cli", "import-taxonomy"]
+    environment:
+      MIP_DATABASE_URL: postgresql+psycopg://mip:mip@db/mip
+      MIP_DATA_ROOT: /data/memory
+    volumes: ["../memory:/data/memory:ro"]
+    depends_on: [api]
+
+volumes: { pgdata: {}, jobs: {} }

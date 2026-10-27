@@ -1,0 +1,14 @@
+# Data stays out of version control (imported and versioned by the platform itself)
+memory/
+.DS_Store
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+spider-platform/var/
+.env
+# Node / Next.js
+node_modules/
+.next/
+*.tsbuildinfo
+.env.local

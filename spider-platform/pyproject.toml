@@ -1,0 +1,9 @@
+[project]
+name = "emithran-mip"
+version = "1.0.0"
+description = "Manufacturing data spider & market intelligence platform"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
