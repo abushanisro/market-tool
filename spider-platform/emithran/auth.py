@@ -16,7 +16,7 @@ from fastapi import Depends, Header, HTTPException
 
 from .config import get_settings
 
-READ, ADMIN = "read:data", "admin:platform"          # permissions granted to Auth0 roles `viewer` and `admin`
+READ, WRITE, ADMIN = "read:data", "write:data", "admin:platform"   # Auth0 roles: viewer = READ; editor = READ+WRITE; admin = all three
 log = logging.getLogger("emithran.auth")
 
 
@@ -26,7 +26,7 @@ class Principal:
     permissions: frozenset[str]
 
 
-DEV = Principal("dev", frozenset({READ, ADMIN}))
+DEV = Principal("dev", frozenset({READ, WRITE, ADMIN}))
 
 
 def enabled() -> bool:
@@ -68,14 +68,26 @@ def user(p: Principal = Depends(principal)) -> Principal:
     return _need(p, READ)
 
 
-def admin(p: Principal = Depends(principal), x_admin_token: str | None = Header(default=None)) -> Principal:
-    """Write access. In development (no Auth0) the optional shared secret still guards writes."""
-    if enabled():
-        return _need(p, ADMIN)
+def _dev_writes(p: Principal, x_admin_token: str | None) -> Principal:
+    """Development (no Auth0): the optional shared secret still guards every write."""
     secret = get_settings().admin_token
     if secret and not hmac.compare_digest(x_admin_token or "", secret):
         raise HTTPException(401, "X-Admin-Token required")
     return p
+
+
+def editor(p: Principal = Depends(principal), x_admin_token: str | None = Header(default=None)) -> Principal:
+    """Day-to-day changes: run crawls and agents, acknowledge flags, curate data. Admins can do everything editors can."""
+    if not enabled():
+        return _dev_writes(p, x_admin_token)
+    if not p.permissions & {WRITE, ADMIN}:
+        raise HTTPException(403, f"Requires permission {WRITE}")
+    return p
+
+
+def admin(p: Principal = Depends(principal), x_admin_token: str | None = Header(default=None)) -> Principal:
+    """Platform administration: settings, model setup, re-import, API clients and keys."""
+    return _need(p, ADMIN) if enabled() else _dev_writes(p, x_admin_token)
 
 
 def machine(x_admin_token: str | None = Header(default=None)) -> None:

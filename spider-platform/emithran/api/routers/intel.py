@@ -19,7 +19,7 @@ from ...models import (
 from ...normalize.materials import FAMILY_DISPLAY
 from ...taxonomy.categories import FAMILY_LABELS
 from ...auth import user
-from ..deps import iso, require_admin
+from ..deps import iso, require_editor
 
 router = APIRouter(prefix="/api", dependencies=[Depends(user)])
 
@@ -142,7 +142,7 @@ class ConfirmIn(BaseModel):
     confirmed_by: str
 
 
-@router.post("/identifiers/{code}/confirm", dependencies=[Depends(require_admin)])
+@router.post("/identifiers/{code}/confirm", dependencies=[Depends(require_editor)])
 def confirm_identifier(code: str, body: ConfirmIn, s: Session = Depends(get_session)):
     u = s.execute(select(UnresolvedIdentifier).where(UnresolvedIdentifier.code == code)).scalar_one_or_none()
     if u is None:
@@ -395,7 +395,7 @@ class RuleIn(BaseModel):
     window_days: int = 30
 
 
-@router.post("/alerts/rules", dependencies=[Depends(require_admin)])
+@router.post("/alerts/rules", dependencies=[Depends(require_editor)])
 def add_rule(body: RuleIn, s: Session = Depends(get_session)):
     if body.kind not in {"price_change", "fx_change", "stale_source", "source_failure"}:
         raise HTTPException(400, "unknown rule kind")
@@ -405,14 +405,14 @@ def add_rule(body: RuleIn, s: Session = Depends(get_session)):
     return {"id": r.id}
 
 
-@router.post("/alerts/evaluate", dependencies=[Depends(require_admin)])
+@router.post("/alerts/evaluate", dependencies=[Depends(require_editor)])
 def evaluate(s: Session = Depends(get_session)):
     res = alerts_mod.evaluate_alerts(s)
     s.commit()
     return res
 
 
-@router.post("/alerts/{eid}/ack", dependencies=[Depends(require_admin)])
+@router.post("/alerts/{eid}/ack", dependencies=[Depends(require_editor)])
 def ack(eid: int, s: Session = Depends(get_session)):
     e = s.get(AlertEvent, eid)
     if e is None:

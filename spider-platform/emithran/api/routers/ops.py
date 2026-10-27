@@ -21,7 +21,7 @@ from ...models import (
 )
 from ...registry.service import SourceConfig, freshness, register_source, update_source
 from ...auth import Principal, enabled as auth_enabled, principal, user
-from ..deps import iso, require_admin
+from ..deps import iso, require_admin, require_editor
 
 router = APIRouter(prefix="/api", dependencies=[Depends(user)])
 public = APIRouter(prefix="/api")           # no sign-in: the host's health check
@@ -55,9 +55,9 @@ def job_dict(j: CrawlJob, src: Source | None = None) -> dict[str, Any]:
 @router.get("/me")
 def me(p: Principal = Depends(principal)):
     """The signed-in user's identity and what they may do; the dashboard uses it to hide admin actions."""
-    from ...auth import ADMIN
+    from ...auth import ADMIN, WRITE
 
-    return {"sub": p.sub, "admin": ADMIN in p.permissions, "auth": auth_enabled()}
+    return {"sub": p.sub, "admin": ADMIN in p.permissions, "editor": bool(p.permissions & {WRITE, ADMIN}), "auth": auth_enabled()}
 
 
 @public.get("/health")
@@ -186,7 +186,7 @@ def source_urls(slug: str, status: str | None = None, limit: int = Query(100, le
                        "items_extracted": u.items_extracted, "error": u.error} for u in rows]}
 
 
-@router.post("/sources", dependencies=[Depends(require_admin)])
+@router.post("/sources", dependencies=[Depends(require_editor)])
 def create_source(cfg: SourceConfig, s: Session = Depends(get_session)):
     try:
         src = register_source(s, cfg)
@@ -196,7 +196,7 @@ def create_source(cfg: SourceConfig, s: Session = Depends(get_session)):
     return source_dict(src)
 
 
-@router.patch("/sources/{slug}", dependencies=[Depends(require_admin)])
+@router.patch("/sources/{slug}", dependencies=[Depends(require_editor)])
 def patch_source(slug: str, patch: dict[str, Any], s: Session = Depends(get_session)):
     src = s.execute(select(Source).where(Source.slug == slug)).scalar_one_or_none()
     if src is None:
@@ -231,7 +231,7 @@ def list_jobs(source: str | None = None, status: str | None = None, limit: int =
     return {"items": [job_dict(j, src) for j, src in rows]}
 
 
-@router.post("/jobs", dependencies=[Depends(require_admin)])
+@router.post("/jobs", dependencies=[Depends(require_editor)])
 def start_job(body: JobIn, s: Session = Depends(get_session)):
     try:
         job = create_job(s, body.source, trigger="manual", params=body.params)
@@ -242,7 +242,7 @@ def start_job(body: JobIn, s: Session = Depends(get_session)):
     return job_dict(job)
 
 
-@router.post("/jobs/{job_id}/cancel", dependencies=[Depends(require_admin)])
+@router.post("/jobs/{job_id}/cancel", dependencies=[Depends(require_editor)])
 def stop_job(job_id: int, s: Session = Depends(get_session)):
     try:
         job = cancel_job(s, job_id)

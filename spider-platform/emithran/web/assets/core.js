@@ -18,13 +18,17 @@ const dt = (iso) => iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "
 // Behind the Vercel front door the dashboard lives under /dashboard and every call goes through its authenticated proxy;
 // served directly by the backend (local development) it talks to the same origin.
 const API_BASE = location.pathname.startsWith("/dashboard") ? "/api/emithran" : "";
-const ME = { auth: false, admin: true, sub: "dev" };   // overwritten by /api/me
-async function loadMe() { try { Object.assign(ME, await api("/api/me")); } catch { /* keep the defaults */ } document.body.classList.toggle("viewer", ME.auth && !ME.admin); }
+const ME = { auth: false, admin: true, editor: true, sub: "dev" };   // overwritten by /api/me
+const ADMIN_ONLY = /^\/api\/(settings|admin\/|agents\/llm\/assign)/;     // model setup, crawl limits, re-import: the backend enforces this too
+async function loadMe() { try { Object.assign(ME, await api("/api/me")); } catch { /* keep the defaults */ } document.body.classList.toggle("viewer", ME.auth && !ME.editor); }
 const ADMIN = { token: (() => { try { return localStorage.getItem("emithran_admin_token") || ""; } catch { return ""; } })() };
 async function api(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
   if (ADMIN.token && !API_BASE) headers["X-Admin-Token"] = ADMIN.token;      // development only; signed-in users never send it
-  if (ME.auth && !ME.admin && (opts.method || "GET") !== "GET") { const e = new Error("Admin access required: your account is read-only"); e.status = 403; throw e; }
+  if (ME.auth && (opts.method || "GET") !== "GET") {                           // fail fast with a clear message; the backend is the real gate
+    const denied = !ME.editor ? "Editing access required: your account is read-only" : ADMIN_ONLY.test(path) && !ME.admin ? "Admin access required for this action" : null;
+    if (denied) { const e = new Error(denied); e.status = 403; throw e; }
+  }
   const res = await fetch(API_BASE + path, { ...opts, headers, body: opts.body && typeof opts.body !== "string" ? JSON.stringify(opts.body) : opts.body });
   if (res.status === 401 && API_BASE) { location.assign("/auth/login?returnTo=" + encodeURIComponent(location.pathname + location.hash)); return new Promise(() => {}); }  // session ended
   if (!res.ok) {
@@ -79,7 +83,7 @@ const FLAG_HELP = {
   replayed: "Produced from a recorded real response (offline replay), not a live request",
   as_of_unknown: "The source does not state the date of this value",
   period_from_release_metadata: "Date taken from the digital factory release (aP2025R1 2026-03)",
-  country_from_digital_factory_default: "Country inferred from the aPriori USA digital factory",
+  country_from_digital_factory_default: "Country inferred from the eMithran USA digital factory",
   fx_fallback_internal_table: "Converted with the internal exchange_rate_table (may be outdated)",
   fx_internal_table: "Rate from exchange_rate_table.csv", non_mass_unit: "Price is per area/piece, not per kg",
   unit_not_stated_in_source: "Source gives a cost without a unit", large_change: "≥35% change vs previous value",
@@ -164,7 +168,7 @@ async function refreshChrome() {
     LIVE.at = new Date();
     const badge = `<span class="live ${LIVE.on ? "on" : ""}" title="${LIVE.on ? "Receiving live updates" : "Live updates paused - reconnecting"}"><i></i>${LIVE.on ? "Live" : "Offline"}</span>`;
     $("#ticker").innerHTML = `${badge} · Records <b>${nf.format(o.records.observations + o.records.documents)}</b> · Sources <b>${o.sources.active}/${o.sources.total}</b> · Spiders running <b>${o.spiders.running}</b> · Updated <b>${LIVE.at.toLocaleTimeString()}</b>`;
-    $("#sidebar-foot").innerHTML = `<span class="dot"></span>API online · last refresh ${esc(ago(o.last_successful_refresh))}${ME.auth ? ` · ${ME.admin ? "admin" : "viewer"} · <a href="/auth/logout">Sign out</a>` : ""}`;
+    $("#sidebar-foot").innerHTML = `<span class="dot"></span>API online · last refresh ${esc(ago(o.last_successful_refresh))}${ME.auth ? ` · ${ME.admin ? "admin" : ME.editor ? "editor" : "viewer"} · <a href="/auth/logout">Sign out</a>` : ""}`;
   } catch (e) { $("#sidebar-foot").innerHTML = `<span class="dot" style="background:#f85149"></span>API unreachable`; }
 }
 

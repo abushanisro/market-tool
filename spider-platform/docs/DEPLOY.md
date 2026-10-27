@@ -15,13 +15,19 @@ Dashboard: https://manage.auth0.com
 
 1. **API** (Applications > APIs > Create). Identifier: `https://api.emithran.com` (this exact string is the *audience*, it is not a real URL). Signing algorithm RS256.
    In its settings turn on **Enable RBAC**, **Add Permissions in the Access Token** and **Allow Offline Access**.
-2. **Permissions** on that API: `read:data` and `admin:platform`.
-3. **Roles** (User Management > Roles): `viewer` = `read:data`; `admin` = `read:data` + `admin:platform`.
+2. **Permissions** on that API: `read:data`, `write:data` and `admin:platform`.
+3. **Roles** (User Management > Roles, then Permissions tab > Add Permissions):
+
+   | Role | Permissions | Can do |
+   |---|---|---|
+   | `viewer` | `read:data` | read everything |
+   | `editor` | `read:data` + `write:data` | plus: run and cancel crawls, register/edit sources, run agents, acknowledge/dismiss flags, confirm identifiers, manage alert rules |
+   | `admin` | all three | plus: model setup, crawl-limit settings, taxonomy re-import, Developer Console (API clients and keys) |
 4. **Application** (Applications > Create, type *Regular Web Application*). Allowed Callback URLs `https://<your-vercel-domain>/auth/callback`
    (and `http://localhost:3100/auth/callback` for local work); Allowed Logout URLs `https://<your-vercel-domain>` (and `http://localhost:3100`).
    Note its *Domain*, *Client ID* and *Client Secret*.
 5. **Invite-only**: Authentication > Database > Username-Password-Authentication > turn on **Disable Sign Ups**. Add users under User Management > Users and
-   give each a role. Everyone you do not add cannot sign in.
+   give each one role (`viewer`, `editor` or `admin`). Everyone you do not add cannot sign in.
 
 ## 2. Backend on Railway
 
@@ -74,6 +80,7 @@ To try sign-in locally, set the Auth0 values in `spider-platform/.env` and `deve
 ## Checks after deploying
 
 * `https://<vercel>/docs/...` loads without signing in; `https://<vercel>/dashboard/` sends you to Auth0.
-* Signed in as a `viewer`: the dashboard loads, an admin action (Run all agents) says "Admin access required".
-* Signed in as an `admin`: the action works and `/console` lists clients.
+* Signed in as a `viewer`: the dashboard loads; any change (Run all agents, acknowledge a flag) says "Editing access required".
+* Signed in as an `editor`: running agents and acknowledging flags work; Model setup and Settings say "Admin access required".
+* Signed in as an `admin`: everything works and `/console` lists clients.
 * `curl https://<railway>/api/overview` returns 401 without a token; `curl https://<railway>/api/fetcher/jobs/1/plan` returns 401.

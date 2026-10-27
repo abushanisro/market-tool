@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import datetime as dt
 
-from ..auth import admin
+from ..auth import admin, editor
 from ..db import get_session  # noqa: F401  (re-export)
 
 
-require_admin = admin  # write access: Auth0 role `admin` (development: optional shared secret); see emithran/auth.py
+require_admin = admin    # settings, model setup, re-import: Auth0 role `admin`
+require_editor = editor  # day-to-day writes: roles `editor` and `admin` (development: optional shared secret); see emithran/auth.py
 
 
 def iso(d):

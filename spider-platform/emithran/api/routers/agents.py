@@ -16,7 +16,7 @@ from ...agents.llm import ALLOW_HOSTED_KEY, ASSIGN_KEY, LLMGateway
 from ...db import get_session, session_scope
 from ...models import AgentEvent, AgentFinding, AgentRun, AppSetting
 from ...auth import user
-from ..deps import iso, require_admin
+from ..deps import iso, require_admin, require_editor
 
 router = APIRouter(prefix="/api/agents", tags=["agents"], dependencies=[Depends(user)])
 STALE_RUN = dt.timedelta(minutes=15)
@@ -144,7 +144,7 @@ class StatusIn(BaseModel):
     status: str = Field(pattern="^(open|ack|dismissed)$")
 
 
-@router.post("/findings/{fid}/status", dependencies=[Depends(require_admin)])
+@router.post("/findings/{fid}/status", dependencies=[Depends(require_editor)])
 def set_status(fid: int, body: StatusIn, s: Session = Depends(get_session)):
     f = s.get(AgentFinding, fid)
     if f is None:
@@ -159,7 +159,7 @@ class RunIn(BaseModel):
     use_llm: bool | None = None
 
 
-@router.post("/run", dependencies=[Depends(require_admin)])
+@router.post("/run", dependencies=[Depends(require_editor)])
 def run(body: RunIn, s: Session = Depends(get_session)):
     bad = [a for a in (body.agents or []) if a not in brain.BY_ID]
     if bad:

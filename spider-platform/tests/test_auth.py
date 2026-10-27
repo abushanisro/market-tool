@@ -26,6 +26,9 @@ def token(perms=("read:data",), *, aud=AUD, iss=f"https://{DOMAIN}/", exp=3600, 
     return jwt.encode(claims, _pem(key), algorithm="RS256", headers={"kid": "t"})
 
 
+VIEWER, EDITOR, ADMIN = ("read:data",), ("read:data", "write:data"), ("read:data", "write:data", "admin:platform")
+
+
 def bearer(**kw):
     return {"Authorization": f"Bearer {token(**kw)}"}
 
@@ -59,12 +62,26 @@ def test_signed_in_users_can_read_and_everyone_else_cannot(client):
         assert r.status_code == 401 and r.headers["www-authenticate"] == "Bearer"                 # wrong audience / issuer / expired / bad signature
 
 
-def test_only_admins_can_write(client):
+def test_only_editors_and_admins_can_write(client):
     body = {"source": "does-not-exist"}                    # reaches the handler only if auth passed: it answers 400 for an unknown source
     assert client.post("/api/jobs", json=body).status_code == 401
-    assert client.post("/api/jobs", json=body, headers=bearer()).status_code == 403              # viewer
-    assert client.post("/api/jobs", json=body, headers=bearer(perms=("read:data", "admin:platform"))).status_code == 400
+    assert client.post("/api/jobs", json=body, headers=bearer(perms=VIEWER)).status_code == 403
+    assert client.post("/api/jobs", json=body, headers=bearer(perms=EDITOR)).status_code == 400
+    assert client.post("/api/jobs", json=body, headers=bearer(perms=ADMIN)).status_code == 400
+    assert client.post("/api/jobs", json=body, headers=bearer(perms=("read:data", "admin:platform"))).status_code == 400   # admin alone implies editor
     assert client.post("/api/jobs", json=body, headers={"X-Admin-Token": SECRET}).status_code == 401   # the machine secret is not a user login
+
+
+def test_editors_do_day_to_day_work_but_cannot_administer(client):
+    editor, admin, viewer = bearer(perms=EDITOR), bearer(perms=ADMIN), bearer(perms=VIEWER)
+    admin_only = [("PUT", "/api/settings", {}), ("POST", "/api/agents/llm/assign", {"allow_hosted_internal": True}), ("POST", "/api/admin/import-taxonomy", None)]
+    for method, url, body in admin_only:
+        assert client.request(method, url, json=body, headers=viewer).status_code == 403, url
+        assert client.request(method, url, json=body, headers=editor).status_code == 403, url          # editors cannot change settings, models or re-import
+        assert client.request(method, url, json=body, headers=admin).status_code not in (401, 403), url  # admins can
+    for method, url, body in [("POST", "/api/alerts/evaluate", None), ("POST", "/api/agents/findings/99999/status", {"status": "ack"}), ("POST", "/api/jobs/99999/cancel", None)]:
+        assert client.request(method, url, json=body, headers=viewer).status_code == 403, url
+        assert client.request(method, url, json=body, headers=editor).status_code not in (401, 403), url   # acknowledge, cancel, evaluate: editor work
 
 
 def test_machine_secret_works_only_on_the_fetcher_api(client):
@@ -76,8 +93,10 @@ def test_machine_secret_works_only_on_the_fetcher_api(client):
 
 def test_health_is_open_and_me_reports_the_role(client):
     assert client.get("/api/health").status_code == 200
-    assert client.get("/api/me", headers=bearer()).json() == {"sub": "auth0|u1", "admin": False, "auth": True}
-    assert client.get("/api/me", headers=bearer(perms=("read:data", "admin:platform"))).json()["admin"] is True
+    me = lambda perms: client.get("/api/me", headers=bearer(perms=perms)).json()
+    assert me(VIEWER) == {"sub": "auth0|u1", "admin": False, "editor": False, "auth": True}
+    assert me(EDITOR) == {"sub": "auth0|u1", "admin": False, "editor": True, "auth": True}
+    assert me(ADMIN) == {"sub": "auth0|u1", "admin": True, "editor": True, "auth": True}
 
 
 def test_event_stream_requires_sign_in(client):
@@ -100,7 +119,7 @@ def test_development_mode_stays_open_when_auth0_is_not_configured(seeded):
 
     with TestClient(app) as c:
         assert c.get("/api/overview").status_code == 200
-        assert c.get("/api/me").json() == {"sub": "dev", "admin": True, "auth": False}
+        assert c.get("/api/me").json() == {"sub": "dev", "admin": True, "editor": True, "auth": False}
 
 
 def test_production_refuses_to_start_without_auth0_and_the_machine_secret(seeded, monkeypatch):
