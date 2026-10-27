@@ -1,3 +1,10 @@
+FROM golang:1.27-alpine AS gobuild
+WORKDIR /src
+COPY go-fetcher/go.mod go-fetcher/go.sum ./
+RUN go mod download
+COPY go-fetcher ./
+RUN CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /out/mip-fetch ./cmd/mip-fetch
+
 FROM python:3.12-slim
 
 ARG WITH_PLAYWRIGHT=false
@@ -8,6 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends libpq5 curl && 
 COPY requirements.txt .
 RUN pip install -r requirements.txt \
  && if [ "$WITH_PLAYWRIGHT" = "true" ]; then python -m playwright install --with-deps chromium; fi
+
+COPY --from=gobuild /out/mip-fetch /usr/local/bin/mip-fetch
+ENV MIP_GO_FETCHER_BIN=/usr/local/bin/mip-fetch
 
 COPY mip ./mip
 COPY migrations ./migrations

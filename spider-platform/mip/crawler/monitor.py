@@ -6,18 +6,17 @@ import logging
 from collections import deque
 
 from scrapy import signals
-from sqlalchemy import select
 from twisted.internet import task
 
 from ..db import session_scope
-from ..models import CrawlJob, CrawlLog, CrawlUrl
-from .middlewares import url_hash
+from ..models import CrawlJob, CrawlLog
+from .writer import upsert_crawl_urls
 
 STAT_KEYS = {
     "mip/urls_discovered": "urls_discovered", "mip/urls_queued": "urls_queued", "mip/pages_fetched": "pages_fetched",
     "mip/pages_unchanged": "pages_unchanged", "mip/not_modified": "not_modified", "mip/items_extracted": "items_extracted",
     "mip/items_inserted": "items_stored", "mip/items_revised": "items_revised", "mip/items_duplicate": "items_duplicate",
-    "mip/items_quarantined": "items_quarantined", "mip/items_invalid": "items_invalid", "mip/items_error": "items_error",
+    "mip/items_quarantined": "items_quarantined", "mip/items_invalid": "items_invalid", "mip/items_error": "items_error", "mip/items_filtered": "items_filtered",
     "mip/requests_failed": "requests_failed", "mip/processing_errors": "processing_errors", "mip/retries": "retries",
     "mip/urls_duplicate": "urls_duplicate", "mip/urls_over_budget": "urls_over_budget",
 }
@@ -80,22 +79,7 @@ class JobMonitor:
             job.heartbeat_at = dt.datetime.now(dt.timezone.utc)
             for ts, level, msg in logs:
                 s.add(CrawlLog(job_id=sp.job_id, ts=ts, level=level, message=msg))
-            if updates:
-                hashes = {url_hash(u): u for u in updates}
-                existing = {c.url_hash: c for c in s.execute(select(CrawlUrl).where(
-                    CrawlUrl.source_id == sp.source["id"], CrawlUrl.url_hash.in_(list(hashes)))).scalars()}
-                for h, u in hashes.items():
-                    rec = dict(updates[u])
-                    rec.pop("url", None)
-                    c = existing.get(h)
-                    if c is None:
-                        c = CrawlUrl(source_id=sp.source["id"], url=u, url_hash=h)
-                        s.add(c)
-                    if rec.get("last_fetched") is not None:
-                        c.fetch_count = (c.fetch_count or 0) + 1
-                    for k, v in rec.items():
-                        if hasattr(c, k) and v is not None:
-                            setattr(c, k, v)
+            upsert_crawl_urls(s, sp.source["id"], updates)
             return bool(job.cancel_requested)
 
     def tick(self):

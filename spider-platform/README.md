@@ -106,7 +106,8 @@ New sources start `paused`; a source can only be activated once its verification
 
 ## Crawling behaviour
 
-* Scrapy is the only crawl engine; `scrapy-playwright` is switched on per source (`render_js`).
+* Two engines share one parsing/storage pipeline: Scrapy (default; `scrapy-playwright` per source via `render_js`, sitemaps,
+  link discovery) and the Go fetch worker for high-volume API/feed sources (next section).
 * One OS process per job → failure isolation; DB-backed queue (`SKIP LOCKED` on Postgres).
 * Scope: allowed domains, allow/deny regexes, depth, per-source page budget + global cap, URL
   canonicalization (tracking params stripped), duplicate URL suppression.
@@ -116,6 +117,50 @@ New sources start `paused`; a source can only be activated once its verification
   heartbeat + stale-job recovery, job timeout, auto-pause after N consecutive failures, `JOBDIR` resume.
 * Respect: robots.txt obeyed by default; no CAPTCHA solving, login, paywall or anti-bot circumvention.
 * Scheduling: interval or cron (UTC) per source, historical backfill windows (e.g. Frankfurter).
+
+## Go fetch worker (high-concurrency engine)
+
+`go-fetcher/` is a Go binary (`mip-fetch`) that takes over the *fetching* for sources marked
+`extraction.fetch_engine: go` (Frankfurter FX, World Bank WDI, Eurostat, UN Comtrade, Manufacturing Dive RSS).
+Parsing, normalization, quality rules and storage stay in Python, so there is one implementation of each.
+
+```
+worker.dispatch ──► mip-fetch run --job N          (one OS process per job, like the Scrapy engine)
+                      GET  /api/fetcher/jobs/N/plan        URLs, politeness, ETag/hash checkpoints
+                      fetch: per-host pacing + concurrency cap, conditional GET, retry/backoff/Retry-After,
+                             robots.txt (Google semantics), body-hash unchanged detection, cancel/timeout
+                      POST /api/fetcher/jobs/N/pages       raw pages, batched → existing parsers → ObservationStore
+                      POST /api/fetcher/jobs/N/heartbeat   stats + logs; returns {cancel}
+                      POST /api/fetcher/jobs/N/finish      same finalize() as Scrapy → succeeded/partial/failed
+```
+
+* **Why Go here:** goroutines make thousands of in-flight requests cheap — the worker runs
+  `concurrency × hosts` fetchers (cap 256), each host individually rate-limited, in one small static binary.
+* **Opt-in and safe:** without `MIP_GO_FETCHER_BIN` (or for sources needing JS rendering / sitemaps / link-discovery)
+  the job transparently runs on Scrapy. Both engines produce identical records (tested against the same recordings).
+* **Control plane** (`/api/fetcher/*`) is protected by `X-Admin-Token` when `MIP_ADMIN_TOKEN` is set — keep it off the public internet.
+
+```bash
+cd go-fetcher && go build -o ../var/bin/mip-fetch ./cmd/mip-fetch && go test -race ./...
+export MIP_GO_FETCHER_BIN=$PWD/../var/bin/mip-fetch        # then run the worker as usual
+../var/bin/mip-fetch run --job 42 --api http://127.0.0.1:8000 [--replay-dir ../tests/fixtures/replay]
+```
+
+**What “real time” means here:** these publishers update daily (ECB ~16:00 CET), monthly or annually — nothing upstream is
+tick-by-tick, and the platform does not pretend otherwise. Freshness is bounded by the publisher; the Go engine makes
+frequent polling cheap (an unchanged poll is one conditional GET → `304`, nothing re-parsed). Current cadence:
+FX every 10 min during the ECB publication window (weekdays 13–17 UTC), news every 15 min, indicators, labour cost and metals prices daily.
+
+**Live dashboard:** `GET /api/stream` (server-sent events) announces new observations/documents and job start/finish; the UI shows a
+"Live" badge and quietly redraws Overview and Market when data lands (never while a panel is open or a field is focused). Add `?live=0` to the
+URL to disable the stream (screenshots, debugging).
+Change `schedule_cron` / `schedule_interval_minutes` per source (UI or `sources.yaml`). Prices from exchanges
+(LME, MCX, …) are not available: their terms forbid scraping, so those sources stay blocked.
+
+## Manufacturing news and agents
+
+* **Manufacturing News** (`#/news`): live, paged, manufacturing-only headlines tagged to your `memory/` categories, countries and hubs: `docs/NEWS.md`.
+* **Agent Intelligence** (`#/agents`): seven specialist agents, the Brain, flags with history and forecasts: `docs/AGENTS.md`.
 
 ## Data quality
 

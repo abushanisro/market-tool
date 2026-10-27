@@ -53,3 +53,11 @@ def test_quality_rules():
     jump = assess(kind="fx", value=100, previous_value=60)
     assert jump.status == "unverified" and "large_change" in jump.flags
     assert assess(kind="fx", value=1, source_verified=False).status == "unverified"
+
+
+def test_eurostat_country_codes_map_to_iso3():
+    from mip.normalize.countries import to_iso3
+
+    assert to_iso3("EL") == "GRC" and to_iso3("UK") == "GBR"   # Eurostat's own codes
+    assert to_iso3("GR") == "GRC" and to_iso3("DE") == "DEU"
+    assert to_iso3("XX") is None                                # unknown stays unknown, never guessed

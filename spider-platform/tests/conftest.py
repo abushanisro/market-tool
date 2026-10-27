@@ -19,6 +19,8 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("MIP_JOBS_DIR", str(tmp_path / "jobs"))
     from mip import config, db as dbmod
 
+    # never let a developer's local .env (admin token, Go binary path, ...) leak into tests
+    monkeypatch.setitem(config.Settings.model_config, "env_file", None)
     config.get_settings.cache_clear()
     dbmod.reset_engine()
     dbmod.init_db()

@@ -11,6 +11,7 @@ were confirmed only from documentation or a landing page, or could not be confir
 | World Bank WDI | `https://api.worldbank.org/v2/country/{ISO3;…}/indicator/NV.IND.MANF.ZS?format=json` | JSON, no key, paged | annual | CC BY 4.0 · yes | **verified** (payload captured; `.CD` variant not captured) |
 | Eurostat `sts_inpr_m` | `…/eurostat/api/dissemination/statistics/1.0/data/sts_inpr_m?…` | JSON-stat 2.0, no key | monthly | Eurostat reuse policy · yes (attribution) | **verified** (needs dimension filters) |
 | UN Comtrade preview | `https://comtradeapi.un.org/public/v1/preview/C/A/HS?reporterCode=699&…` | JSON, no key (preview) | annual/monthly | UN Comtrade terms · conditional | **verified** single-code query |
+| Eurostat `lc_lci_lev` (hourly labour cost, manufacturing) | `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/lc_lci_lev?geo=…&nace_r2=C&lcstruct=D1_D4_MD5&unit=EUR&sinceTimePeriod=2008` | JSON-stat 2.0, no key | annual | Eurostat reuse policy · yes (attribution) | **verified** (live request 2026-10-28; EU countries only, EUR/h) |
 | World Bank Pink Sheet | link discovered on `worldbank.org/en/research/commodity-markets` (hash changes monthly) | XLSX | monthly | CC BY 4.0 (catalog default) · conditional | url verified |
 | ISO Open Data | `isopublicstorageprod.blob.core.windows.net/opendata/_latest/…` | CSV/JSON/Parquet | daily | ODC-By 1.0 · yes | url verified (exact file name to confirm) |
 | OpenAlex | `https://api.openalex.org/works?search=…` | JSON; no key 10 req/s | daily | CC0 · yes | documented |

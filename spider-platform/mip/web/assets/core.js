@@ -4,16 +4,16 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const nf = new Intl.NumberFormat("en-US");
-const num = (v, d = 0) => v == null || Number.isNaN(v) ? "—" : Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: 0 });
-const money = (v, d = 2) => v == null ? "—" : "$" + Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
-const pct = (v) => v == null ? "—" : `${v > 0 ? "+" : ""}${Number(v).toFixed(2)}%`;
+const num = (v, d = 0) => v == null || Number.isNaN(v) ? "-" : Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: 0 });
+const money = (v, d = 2) => v == null ? "-" : "$" + Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
+const pct = (v) => v == null ? "-" : `${v > 0 ? "+" : ""}${Number(v).toFixed(2)}%`;
 function ago(iso) {
   if (!iso) return "never";
   const s = (Date.now() - new Date(iso).getTime()) / 1000;
   if (s < 60) return "just now"; if (s < 3600) return `${Math.floor(s / 60)} min ago`; if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
   return `${Math.floor(s / 86400)} d ago`;
 }
-const dt = (iso) => iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—";
+const dt = (iso) => iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "-";
 
 const ADMIN = { token: (() => { try { return localStorage.getItem("mip_admin_token") || ""; } catch { return ""; } })() };
 async function api(path, opts = {}) {
@@ -35,6 +35,8 @@ function toast(msg, isErr = false) {
 
 /* ---------- icons ---------- */
 const I = {
+  agents: '<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4zM18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z"/>',
+  news: '<path d="M4 5h13a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2zM19 9h1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M8 9h7M8 13h7M8 16h4"/>',
   overview: '<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
   spider: '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/>',
   sources: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
@@ -62,6 +64,7 @@ const STATUS_CLASS = {
   queued: "info", unverified: "warn", partial: "warn", stale: "warn", paused: "warn", planned: "plain", key_required: "warn", never: "plain",
   quarantined: "err", failed: "err", failing: "err", blocked_by_terms: "err", disabled: "err", cancelled: "plain", superseded: "plain",
   "n/a": "plain", unresolved: "warn", confirmed: "ok", error: "err", warning: "warn", info: "info",
+  critical: "err", high: "err", medium: "warn", low: "plain", moderate: "warn", elevated: "warn", severe: "err", ack: "plain", dismissed: "plain", open: "info", resolved: "ok",
 };
 const pill = (v, label) => `<span class="pill ${STATUS_CLASS[v] || ""}">${esc(label ?? String(v).replace(/_/g, " "))}</span>`;
 const flagTags = (flags = []) => flags.map((f) => `<span class="tag ${f === "replayed" ? "teal" : ""}" title="${esc(FLAG_HELP[f] || f)}">${esc(f.replace(/_/g, " "))}</span>`).join("");
@@ -92,7 +95,7 @@ function table(cols, rows, { onRow, empty = "No rows", selected } = {}) {
   if (!rows.length) return emptyState(empty);
   const head = cols.map((c) => `<th class="${c.num ? "num" : ""}">${esc(c.label)}</th>`).join("");
   const body = rows.map((r, i) => `<tr class="${onRow ? "click" : ""} ${selected && selected(r) ? "sel" : ""}" data-i="${i}">${cols.map((c) =>
-    `<td class="${c.num ? "num" : ""} ${c.cls || ""}">${c.html ? c.html(r) : esc(r[c.key] ?? "—")}</td>`).join("")}</tr>`).join("");
+    `<td class="${c.num ? "num" : ""} ${c.cls || ""}">${c.html ? c.html(r) : esc(r[c.key] ?? "-")}</td>`).join("")}</tr>`).join("");
   const id = "t" + Math.random().toString(36).slice(2, 8);
   setTimeout(() => { const t = document.getElementById(id); if (t && onRow) t.addEventListener("click", (e) => { const tr = e.target.closest("tr[data-i]"); if (tr && !e.target.closest("a,button,input,select,label")) onRow(rows[+tr.dataset.i], tr); }); });
   return `<div class="table-wrap"><table class="t" id="${id}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
@@ -113,6 +116,8 @@ const NAV = [
   { path: "overview", label: "Overview", icon: "overview" },
   { path: "materials", label: "Material Intelligence", icon: "material" },
   { path: "market", label: "Market Intelligence", icon: "market" },
+  { path: "news", label: "Manufacturing News", icon: "news" },
+  { path: "agents", label: "Agent Intelligence", icon: "agents" },
   { group: "Data operations" },
   { path: "spiders", label: "Spider Manager", icon: "spider" },
   { path: "sources", label: "Source Explorer", icon: "sources" },
@@ -123,6 +128,7 @@ const NAV = [
   { path: "settings", label: "Settings", icon: "settings" },
 ];
 const timers = new Set();
+const liveHooks = new Set();   // screens that update themselves when the server announces new data (e.g. the news feed)
 function every(ms, fn) { const id = setInterval(fn, ms); timers.add(id); return id; }
 function route(path, render) { ROUTES.push({ path, render }); }
 function parseHash() {
@@ -132,7 +138,7 @@ function parseHash() {
 }
 function go(path) { location.hash = "#/" + path; }
 async function render() {
-  timers.forEach(clearInterval); timers.clear(); Charts.hideTip(); closeModal(); closeDrawer();
+  timers.forEach(clearInterval); timers.clear(); liveHooks.clear(); Charts.hideTip(); closeModal(); closeDrawer();
   const { path, sub, params } = parseHash();
   const r = ROUTES.find((x) => x.path === path) || ROUTES[0];
   $$("#nav a").forEach((a) => a.classList.toggle("active", a.dataset.path === r.path));
@@ -144,14 +150,46 @@ function buildNav() {
   $("#nav").innerHTML = NAV.map((n) => n.group ? `<div class="nav-group">${n.group}</div>`
     : `<a href="#/${n.path}" data-path="${n.path}">${icon(n.icon)}<span>${n.label}</span></a>`).join("");
 }
+const LIVE = { on: false, at: null };
 async function refreshChrome() {
   try {
     const o = await api("/api/overview");
-    $("#ticker").innerHTML = `Records <b>${nf.format(o.records.observations + o.records.documents)}</b> · Sources <b>${o.sources.active}/${o.sources.total}</b> · Spiders running <b>${o.spiders.running}</b>`;
+    LIVE.at = new Date();
+    const badge = `<span class="live ${LIVE.on ? "on" : ""}" title="${LIVE.on ? "Receiving live updates" : "Live updates paused - reconnecting"}"><i></i>${LIVE.on ? "Live" : "Offline"}</span>`;
+    $("#ticker").innerHTML = `${badge} · Records <b>${nf.format(o.records.observations + o.records.documents)}</b> · Sources <b>${o.sources.active}/${o.sources.total}</b> · Spiders running <b>${o.spiders.running}</b> · Updated <b>${LIVE.at.toLocaleTimeString()}</b>`;
     $("#sidebar-foot").innerHTML = `<span class="dot"></span>API online · last refresh ${esc(ago(o.last_successful_refresh))}`;
   } catch (e) { $("#sidebar-foot").innerHTML = `<span class="dot" style="background:#f85149"></span>API unreachable`; }
+}
+
+/* ---------- live updates: the server announces new data over SSE; chart screens redraw quietly ---------- */
+const LIVE_ROUTES = new Set(["overview", "market", "agents"]);   // screens without typed input / local filters
+let softBusy = false;
+async function softRefresh() {
+  const { path, sub, params } = parseHash();
+  const r = ROUTES.find((x) => x.path === path);
+  if (!r || !LIVE_ROUTES.has(path) || document.hidden || softBusy) return;
+  if ($("#drawer").classList.contains("open") || $("#modal").classList.contains("open")) return;   // never disturb an open panel
+  const a = document.activeElement; if (a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) return;
+  softBusy = true; const y = window.scrollY;
+  try { timers.forEach(clearInterval); timers.clear(); Charts.hideTip(); await r.render($("#view"), { sub, params }); window.scrollTo(0, y); }
+  catch (e) { console.error(e); } finally { softBusy = false; }
+}
+function startLive() {
+  if (!window.EventSource || new URLSearchParams(location.search).get("live") === "0") return;   // ?live=0 turns the stream off (screenshots, debugging)
+  const es = new EventSource("/api/stream"); let first = true, t;
+  es.onopen = () => { LIVE.on = true; refreshChrome(); };
+  es.onerror = () => { LIVE.on = false; refreshChrome(); };           // the browser reconnects on its own
+  es.addEventListener("change", () => {
+    LIVE.on = true;
+    if (first) { first = false; return; }                              // initial state, nothing new yet
+    clearTimeout(t); t = setTimeout(async () => { await refreshChrome(); softRefresh(); liveHooks.forEach((f) => f().catch(() => {})); }, 600);
+  });
 }
 document.addEventListener("click", (e) => {
   const r = e.target.closest("[data-retry]"); if (r) render();
   if (e.target.id === "modal") closeModal();
 });
+
+// card subtitles are single-line with an ellipsis; keep the full text available on hover
+new MutationObserver(() => document.querySelectorAll("#view .card-h > .sub:not([title])").forEach((e) => { e.title = e.textContent.trim(); }))
+  .observe(document.getElementById("view"), { childList: true, subtree: true });

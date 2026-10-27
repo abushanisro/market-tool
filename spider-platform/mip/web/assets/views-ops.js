@@ -12,7 +12,7 @@ route("overview", async (view) => {
     <h1>Data spider <em>overview</em></h1>
     <p>Every figure on this page is computed from the platform database at ${esc(dt(o.generated_at))}. Internal taxonomy data and crawled data are counted separately.</p></div>
     <div class="row"><a class="btn" href="#/spiders">${icon("spider")} Spider Manager</a><a class="btn primary" href="#/sources">${icon("sources")} Explore sources</a></div></div>
-  ${replayOnly ? banner(`<b>Crawled records in this database came from recorded responses (replay mode)</b> — real payloads captured 2026-10-27 and replayed offline. They are tagged <span class="tag teal">replayed</span>. Run the worker with network access to collect live data.`, "teal") : ""}
+  ${replayOnly ? banner(`<b>Crawled records in this database came from recorded responses (replay mode)</b>: real payloads captured 2026-10-27 and replayed offline. They are tagged <span class="tag teal">replayed</span>. Run the worker with network access to collect live data.`, "teal") : ""}
   <div class="grid g-6">
     ${kpi("Sources", o.sources.total, `<b>${o.sources.active}</b> active · ${o.sources.by_verification.verified || 0} verified`)}
     ${kpi("Active spiders", o.spiders.running, `<b>${o.spiders.queued}</b> queued`, o.spiders.running ? '<span class="pill info">live</span>' : "")}
@@ -42,7 +42,7 @@ route("overview", async (view) => {
     <div class="card"><div class="card-h"><h3>Recent crawl jobs</h3><a class="small" href="#/spiders">All jobs</a></div><div class="card-b flush">${jobsTable(o.recent_jobs)}</div></div>
     <div class="card"><div class="card-h"><h3>Market source freshness</h3><span class="sub">last successful refresh vs. SLA</span></div><div class="card-b flush">${table([
       { label: "Source", html: (r) => `<a href="#/spiders/${r.source}">${esc(r.name)}</a>` },
-      { label: "Freshness", html: (r) => pill(r.freshness) }, { label: "Latest period", html: (r) => esc(r.latest_period || "—") },
+      { label: "Freshness", html: (r) => pill(r.freshness) }, { label: "Latest period", html: (r) => esc(r.latest_period || "-") },
       { label: "Last success", html: (r) => `<span class="small">${esc(ago(r.last_success_at))}</span>` }], mf.items.filter((x) => x.freshness !== "n/a"))}</div></div>
   </div>
   <div class="card" style="margin-top:16px"><div class="card-h"><h3>Procurement & price alerts</h3><span class="sub">${alerts.events.length} open</span></div>
@@ -85,7 +85,7 @@ async function showJob(id) {
         ["Failed requests", s.requests_failed], ["Processing errors", s.processing_errors], ["Retries", s.retries], ["Out of scope", s.urls_out_of_scope]].map(([k, v]) =>
         `<div class="card kpi" style="padding:10px 12px"><div class="label">${k}</div><div class="value" style="font-size:20px">${num(v || 0)}</div></div>`).join("")}</div>
       <dl class="kv" style="margin-top:14px"><dt>Created</dt><dd>${dt(j.created_at)}</dd><dt>Started</dt><dd>${dt(j.started_at)}</dd><dt>Finished</dt><dd>${dt(j.finished_at)}</dd>
-      <dt>Duration</dt><dd>${j.duration_s != null ? j.duration_s + " s" : "—"}</dd><dt>Params</dt><dd><code>${esc(JSON.stringify(j.params))}</code></dd>${j.error ? `<dt>Error</dt><dd style="color:var(--err)">${esc(j.error)}</dd>` : ""}${s.note ? `<dt>Note</dt><dd>${esc(s.note)}</dd>` : ""}</dl>`;
+      <dt>Duration</dt><dd>${j.duration_s != null ? j.duration_s + " s" : "-"}</dd><dt>Params</dt><dd><code>${esc(JSON.stringify(j.params))}</code></dd>${j.error ? `<dt>Error</dt><dd style="color:var(--err)">${esc(j.error)}</dd>` : ""}${s.note ? `<dt>Note</dt><dd>${esc(s.note)}</dd>` : ""}</dl>`;
     const pre = body.querySelector("#job-log");
     if (logs.items.length && pre.dataset.empty) { pre.textContent = ""; delete pre.dataset.empty; }
     logs.items.forEach((l) => { lastLog = l.id; pre.insertAdjacentHTML("beforeend", `<span class="${l.level}">${esc(l.ts.slice(11, 19))} ${esc(l.level.toUpperCase().padEnd(7))} ${esc(l.message)}</span>\n`); });
@@ -147,22 +147,22 @@ route("spiders", async (view, { sub }) => {
             <span class="spacer" style="flex:1"></span>
             ${s.status === "active" ? `<button class="btn" id="pause">Pause schedule</button>` : s.status === "paused" && runnable ? `<button class="btn" id="activate">Activate schedule</button>` : ""}
             <button class="btn" id="edit">Edit crawl rules</button></div>
-          ${active ? `<div class="banner teal">${icon("info")}<div>Job <a href="#" data-job="${active.id}">#${active.id}</a> is ${esc(active.status)} — ${num(active.stats.pages_fetched || 0)} pages, ${num(active.stats.items_extracted || 0)} items so far.</div></div>` : ""}
+          ${active ? `<div class="banner teal">${icon("info")}<div>Job <a href="#" data-job="${active.id}">#${active.id}</a> is ${esc(active.status)}: ${num(active.stats.pages_fetched || 0)} pages, ${num(active.stats.items_extracted || 0)} items so far.</div></div>` : ""}
           <div class="grid g-2">
             <dl class="kv"><dt>Type</dt><dd>${esc(s.source_type)} · parser <code>${esc(s.extraction?.parser || "none")}</code></dd>
               <dt>Schedule</dt><dd>${s.schedule_cron ? `cron <code>${esc(s.schedule_cron)}</code> (UTC)` : s.schedule_interval_minutes ? `every ${esc(intervalLabel(s.schedule_interval_minutes))}` : "manual only"}</dd>
               <dt>Concurrency / delay</dt><dd>${s.concurrency} · ${s.download_delay}s (AutoThrottle on)</dd>
               <dt>Budget / depth</dt><dd>${s.max_pages} pages · depth ${s.max_depth}</dd>
               <dt>robots.txt</dt><dd>${s.respect_robots ? "obeyed" : "not applied (documented API)"}</dd>
-              <dt>Browser rendering</dt><dd>${s.render_js ? "scrapy-playwright (Chromium)" : "off — plain HTTP"}</dd>
-              <dt>Allowed domains</dt><dd>${(s.allowed_domains || []).map((d) => `<span class="tag">${esc(d)}</span>`).join("") || "—"}</dd>
-              <dt>Allow / deny</dt><dd>${(s.allow_patterns || []).map((d) => `<code class="tag">${esc(d)}</code>`).join("") || "—"} ${(s.deny_patterns || []).map((d) => `<code class="tag" style="color:var(--err)">${esc(d)}</code>`).join("")}</dd></dl>
+              <dt>Browser rendering</dt><dd>${s.render_js ? "scrapy-playwright (Chromium)" : "off: plain HTTP"}</dd>
+              <dt>Allowed domains</dt><dd>${(s.allowed_domains || []).map((d) => `<span class="tag">${esc(d)}</span>`).join("") || "-"}</dd>
+              <dt>Allow / deny</dt><dd>${(s.allow_patterns || []).map((d) => `<code class="tag">${esc(d)}</code>`).join("") || "-"} ${(s.deny_patterns || []).map((d) => `<code class="tag" style="color:var(--err)">${esc(d)}</code>`).join("")}</dd></dl>
             <dl class="kv"><dt>Last run</dt><dd>${dt(s.last_run_at)}</dd><dt>Last success</dt><dd>${dt(s.last_success_at)}</dd>
               <dt>Records (last / total)</dt><dd>${num(s.last_records)} / ${num(s.records)}</dd>
               <dt>Failures</dt><dd>${s.failure_count} total · ${s.consecutive_failures} consecutive</dd>
               ${s.last_error ? `<dt>Last error</dt><dd style="color:var(--err)">${esc(s.last_error)}</dd>` : ""}
-              <dt>URL checkpoints</dt><dd>${Object.entries(s.url_status || {}).map(([k, v]) => `${pill(k === "fetched" || k === "unchanged" ? "fresh" : k === "failed" ? "failed" : "plain", `${k} ${v}`)}`).join(" ") || "—"}</dd>
-              <dt>Start URLs</dt><dd>${(s.start_urls || []).map((u) => `<div class="truncate mono small" title="${esc(u)}">${esc(u)}</div>`).join("") || "—"}</dd></dl></div></div></div>
+              <dt>URL checkpoints</dt><dd>${Object.entries(s.url_status || {}).map(([k, v]) => `${pill(k === "fetched" || k === "unchanged" ? "fresh" : k === "failed" ? "failed" : "plain", `${k} ${v}`)}`).join(" ") || "-"}</dd>
+              <dt>Start URLs</dt><dd>${(s.start_urls || []).map((u) => `<div class="truncate mono small" title="${esc(u)}">${esc(u)}</div>`).join("") || "-"}</dd></dl></div></div></div>
       <div class="card" style="margin-top:16px"><div class="card-h"><h3>Jobs</h3></div><div class="card-b flush">${jobsTable(s.jobs)}</div></div>
       <div class="card" style="margin-top:16px"><div class="card-h"><h3>Discovered URLs</h3><span class="sub">checkpoints used for incremental crawling (ETag / Last-Modified / content hash)</span></div><div class="card-b flush" id="urls">${skeleton(3)}</div></div>`;
     const startJob = async (params) => { try { const j = await api("/api/jobs", { method: "POST", body: { source: s.slug, params } }); toast(`Job #${j.id} queued`); showJob(j.id); drawDetail(); } catch (e) { toast(e.message, true); } };
@@ -187,9 +187,9 @@ route("spiders", async (view, { sub }) => {
     $("#urls").innerHTML = table([
       { label: "URL", html: (u) => `<div class="truncate mono small" title="${esc(u.url)}">${esc(u.url)}</div>${u.error ? `<div class="small" style="color:var(--err)">${esc(u.error)}</div>` : ""}` },
       { label: "Status", html: (u) => pill(u.status === "fetched" || u.status === "unchanged" ? "succeeded" : u.status === "failed" ? "failed" : "plain", u.status) },
-      { label: "HTTP", num: true, html: (u) => u.http_status ?? "—" }, { label: "Items", num: true, html: (u) => num(u.items_extracted) },
-      { label: "Fetches", num: true, html: (u) => num(u.fetch_count) }, { label: "Hash", html: (u) => `<code class="small">${esc(u.content_hash || "—")}</code>` },
-      { label: "Last fetched", html: (u) => `<span class="small nowrap">${esc(ago(u.last_fetched))}</span>` }], urls.items, { empty: "No URLs discovered yet — run the source." });
+      { label: "HTTP", num: true, html: (u) => u.http_status ?? "-" }, { label: "Items", num: true, html: (u) => num(u.items_extracted) },
+      { label: "Fetches", num: true, html: (u) => num(u.fetch_count) }, { label: "Hash", html: (u) => `<code class="small">${esc(u.content_hash || "-")}</code>` },
+      { label: "Last fetched", html: (u) => `<span class="small nowrap">${esc(ago(u.last_fetched))}</span>` }], urls.items, { empty: "No URLs discovered yet: run the source." });
   };
   await drawDetail();
   const drawJobs = async () => { try { const j = await api("/api/jobs?limit=30"); $("#all-jobs").innerHTML = jobsTable(j.items); } catch (e) { $("#all-jobs").innerHTML = errorState(e); } };
@@ -285,7 +285,7 @@ route("sources", async (view, { params }) => {
         { label: "Type", html: (s) => `<span class="tag">${esc(s.source_type)}</span>` },
         { label: "Data", html: (s) => (s.data_kinds || []).map((k) => `<span class="tag">${esc(k)}</span>`).join("") },
         { label: "Verification", html: (s) => pill(s.verification_status) },
-        { label: "Licence", html: (s) => `<div class="small truncate" style="max-width:220px" title="${esc(s.license || "")}">${esc(s.license || "—")}</div><div class="sub">commercial: ${esc(s.commercial_use)}</div>` },
+        { label: "Licence", html: (s) => `<div class="small truncate" style="max-width:220px" title="${esc(s.license || "")}">${esc(s.license || "-")}</div><div class="sub">commercial: ${esc(s.commercial_use)}</div>` },
         { label: "Reliability", html: (s) => `<div class="row" style="flex-wrap:nowrap;min-width:90px"><div class="bar" style="flex:1"><span style="width:${s.reliability * 100}%"></span></div><span class="small">${Math.round(s.reliability * 100)}</span></div>` },
         { label: "Freshness", html: (s) => pill(s.freshness) },
         { label: "Records", num: true, html: (s) => num(s.records) },
@@ -296,14 +296,14 @@ route("sources", async (view, { params }) => {
   load();
 });
 function sourceDrawer(s) {
-  const list = (a) => (a && a.length ? a.map((x) => `<span class="tag">${esc(x)}</span>`).join("") : "—");
+  const list = (a) => (a && a.length ? a.map((x) => `<span class="tag">${esc(x)}</span>`).join("") : "-");
   openDrawer(`<div class="eyebrow">${esc(s.website_category.replace(/_/g, " "))}</div><h2>${esc(s.name)}</h2><div class="row" style="margin-top:6px">${pill(s.verification_status)} ${pill(s.status)} ${pill(s.freshness)}</div>`,
     `<dl class="kv"><dt>Base URL</dt><dd><a href="${esc(s.base_url)}" target="_blank" rel="noopener">${esc(s.base_url)}</a></dd>
     <dt>Source type</dt><dd>${esc(s.source_type)}</dd><dt>Access method</dt><dd>${esc(s.access_method)}</dd>
     <dt>Credential</dt><dd>${s.auth_env_var ? `<code>${esc(s.auth_env_var)}</code> ${s.credential_present ? pill("verified", "set") : pill("key_required", "not set")}` : "none required"}</dd>
-    <dt>Licence</dt><dd>${esc(s.license || "—")} ${s.license_url ? `<a href="${esc(s.license_url)}" target="_blank" rel="noopener">terms</a>` : ""}</dd>
-    <dt>Commercial use</dt><dd>${esc(s.commercial_use)}</dd><dt>Attribution</dt><dd>${esc(s.attribution || "—")}</dd>
-    <dt>Verified on</dt><dd>${esc(s.verified_at || "—")}</dd><dt>Update frequency</dt><dd>${esc(s.update_frequency || "—")}</dd>
+    <dt>Licence</dt><dd>${esc(s.license || "-")} ${s.license_url ? `<a href="${esc(s.license_url)}" target="_blank" rel="noopener">terms</a>` : ""}</dd>
+    <dt>Commercial use</dt><dd>${esc(s.commercial_use)}</dd><dt>Attribution</dt><dd>${esc(s.attribution || "-")}</dd>
+    <dt>Verified on</dt><dd>${esc(s.verified_at || "-")}</dd><dt>Update frequency</dt><dd>${esc(s.update_frequency || "-")}</dd>
     <dt>Reliability</dt><dd>${Math.round(s.reliability * 100)} / 100</dd>
     <dt>Data kinds</dt><dd>${list(s.data_kinds)}</dd><dt>Categories</dt><dd>${list(s.categories)}</dd><dt>Materials</dt><dd>${list(s.materials)}</dd>
     <dt>Countries</dt><dd>${list(s.countries)}</dd><dt>Schedule</dt><dd>${s.schedule_cron ? `cron ${esc(s.schedule_cron)} UTC` : s.schedule_interval_minutes ? "every " + intervalLabel(s.schedule_interval_minutes) : "manual"}</dd>
@@ -311,27 +311,28 @@ function sourceDrawer(s) {
     <dt>Extraction</dt><dd><pre class="json">${esc(JSON.stringify(s.extraction, null, 2))}</pre></dd>
     <dt>Last success</dt><dd>${dt(s.last_success_at)}</dd><dt>Records</dt><dd>${num(s.records)} · ${num(s.urls)} URLs</dd>
     <dt>Failures</dt><dd>${s.failure_count} (${s.consecutive_failures} consecutive)</dd>
-    <dt>Notes</dt><dd>${esc(s.notes || "—")}</dd></dl>
+    <dt>Notes</dt><dd>${esc(s.notes || "-")}</dd></dl>
     ${s.source_type !== "internal" ? `<div class="row" style="margin-top:16px"><a class="btn primary" href="#/spiders/${s.slug}">Open in Spider Manager</a><a class="btn" href="#/data?source=${s.slug}">View records</a></div>` : ""}`);
 }
 
 /* =============================== SETTINGS =============================== */
+const shortPath = (p) => { const parts = String(p).split("/").filter(Boolean); return parts.length > 2 ? "…/" + parts.slice(-2).join("/") : p; };
 route("settings", async (view) => {
   const [st, al, imp, ids] = await Promise.all([api("/api/settings"), api("/api/alerts?include_ack=true"), api("/api/admin/import-taxonomy"), api("/api/identifiers")]);
   view.innerHTML = `<div class="page-head"><div><div class="eyebrow">System</div><h1><em>Settings</em></h1><p>Service configuration, crawl limits, source policies, credentials and alert rules.</p></div></div>
   <div class="grid g-2">
     <div class="card"><div class="card-h"><h3>Service</h3></div><div class="card-b"><dl class="kv">
       <dt>Database</dt><dd><code>${esc(st.service.database)}</code></dd><dt>Redis</dt><dd>${st.service.redis_url ? (st.service.redis_connected ? pill("verified", "connected") : pill("failed", "unreachable")) : pill("plain", "not configured (optional)")}</dd>
-      <dt>Taxonomy folder</dt><dd><code>${esc(st.service.data_root)}</code> ${st.service.data_root_exists ? pill("verified", "found") : pill("failed", "missing")}</dd>
-      <dt>Replay mode</dt><dd>${st.service.replay_mode ? pill("key_required", "on — recorded responses") : pill("verified", "off — live network")}</dd>
+      <dt>Taxonomy folder</dt><dd><code title="${esc(st.service.data_root)}">${esc(shortPath(st.service.data_root))}</code> ${st.service.data_root_exists ? "" : pill("failed", "missing")}</dd>
+      <dt>Replay mode</dt><dd>${st.service.replay_mode ? pill("key_required", "on: recorded responses") : pill("verified", "off: live network")}</dd>
       <dt>Worker</dt><dd>${st.service.embedded_worker ? "embedded in API" : "separate process"} · last heartbeat ${esc(ago(st.service.last_job_heartbeat))}</dd>
-      <dt>User-Agent</dt><dd><code class="small">${esc(st.service.user_agent)}</code></dd><dt>Contact e-mail</dt><dd>${esc(st.service.contact_email || "— (set MIP_CONTACT_EMAIL for polite API pools)")}</dd>
+      <dt>User-Agent</dt><dd><code class="small">${esc(st.service.user_agent)}</code></dd><dt>Contact e-mail</dt><dd>${esc(st.service.contact_email || "- (set MIP_CONTACT_EMAIL for polite API pools)")}</dd>
       <dt>Admin token</dt><dd>${st.service.admin_token_required ? "required for changes" : "not required (set MIP_ADMIN_TOKEN in production)"} <input class="input" id="admin-token" type="password" placeholder="Token for this browser" value="${esc(ADMIN.token)}" style="margin-top:6px;width:100%"></dd></dl></div></div>
     <div class="card"><div class="card-h"><h3>Crawl limits</h3><span class="sub">stored in the database; applied to the next job</span></div><div class="card-b">
       <form id="limits" class="form-grid">${Object.entries(st.crawl_policy).map(([k, v]) => `<div class="field"><label>${esc(k.replace(/_/g, " "))}</label><input class="input" name="${k}" type="number" step="any" min="0" value="${esc(v)}"></div>`).join("")}
       <div class="field" style="justify-content:flex-end"><button class="btn primary" type="submit">Save limits</button></div></form>
       <hr class="sep"><h3 style="font-size:13.5px;margin-bottom:8px">Source policies</h3><ul class="small" style="margin:0;padding-left:18px">${st.policies.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></div></div>
-    <div class="card"><div class="card-h"><h3>Credentials</h3><span class="sub">environment variables — values are never shown or stored</span></div><div class="card-b flush">${table([{ label: "Variable", html: (c) => `<code>${esc(c.env_var)}</code>` }, { label: "Status", html: (c) => c.present ? pill("verified", "set") : pill("plain", "not set") }], st.credentials)}</div></div>
+    <div class="card"><div class="card-h"><h3>Credentials</h3><span class="sub">environment variables: values are never shown or stored</span></div><div class="card-b flush">${table([{ label: "Variable", html: (c) => `<code>${esc(c.env_var)}</code>` }, { label: "Status", html: (c) => c.present ? pill("verified", "set") : pill("plain", "not set") }], st.credentials)}</div></div>
     <div class="card"><div class="card-h"><h3>Taxonomy import</h3><span class="sub">re-reads the memory/ folder; unchanged files are skipped by checksum</span></div><div class="card-b">
       <div class="row"><button class="btn primary" id="reimport" ${imp.running ? "disabled" : ""}>${icon("refresh")} Re-import changed files</button><button class="btn" id="reimport-force" ${imp.running ? "disabled" : ""}>Force full re-import</button></div>
       <div id="imp-status" style="margin-top:12px">${importStatus(imp)}</div>
@@ -339,7 +340,7 @@ route("settings", async (view) => {
   </div>
   <div class="card" style="margin-top:16px"><div class="card-h"><h3>Alert rules</h3><button class="btn sm" id="eval">Evaluate now</button></div><div class="card-b flush">${table([
     { label: "Rule", html: (r) => esc(r.name) }, { label: "Kind", html: (r) => `<span class="tag">${esc(r.kind)}</span>` }, { label: "Series", html: (r) => esc(r.series_key || (r.material_id ? "material #" + r.material_id : "all")) },
-    { label: "Threshold", num: true, html: (r) => r.threshold_pct != null ? r.threshold_pct + "%" : "—" }, { label: "Window", num: true, html: (r) => r.window_days + " d" }, { label: "Active", html: (r) => r.active ? pill("verified", "on") : pill("plain", "off") }], al.rules)}</div></div>`;
+    { label: "Threshold", num: true, html: (r) => r.threshold_pct != null ? r.threshold_pct + "%" : "-" }, { label: "Window", num: true, html: (r) => r.window_days + " d" }, { label: "Active", html: (r) => r.active ? pill("verified", "on") : pill("plain", "off") }], al.rules)}</div></div>`;
   $("#admin-token").addEventListener("change", (e) => { ADMIN.token = e.target.value; try { localStorage.setItem("mip_admin_token", ADMIN.token); } catch { /* private mode */ } toast("Token saved for this browser"); });
   $("#limits").addEventListener("submit", async (e) => { e.preventDefault(); const body = Object.fromEntries(new FormData(e.target)); try { await api("/api/settings", { method: "PUT", body }); toast("Limits saved"); } catch (err) { toast(err.message, true); } });
   const runImport = async (force) => { try { await api(`/api/admin/import-taxonomy?force=${force}`, { method: "POST" }); toast("Import started"); poll(); } catch (e) { toast(e.message, true); } };
@@ -348,5 +349,5 @@ route("settings", async (view) => {
   $("#eval").onclick = async () => { try { const r = await api("/api/alerts/evaluate", { method: "POST" }); toast(`${r.fired} new alert(s)`); } catch (e) { toast(e.message, true); } };
 });
 const importStatus = (s) => s.running ? '<div class="progress"><span></span></div><div class="small muted" style="margin-top:6px">Importing…</div>'
-  : s.last ? (s.last.ok ? `<div class="small">${pill("succeeded")} last run ${esc(ago(s.last.started))} — ${esc(Object.entries(s.last.stats).map(([k, v]) => `${k}: ${v}`).join(", "))}</div>` : `<div class="small">${pill("failed")} ${esc(s.last.error)}</div>`)
+  : s.last ? (s.last.ok ? `<div class="small">${pill("succeeded")} last run ${esc(ago(s.last.started))}: ${esc(Object.entries(s.last.stats).map(([k, v]) => `${k}: ${v}`).join(", "))}</div>` : `<div class="small">${pill("failed")} ${esc(s.last.error)}</div>`)
   : '<div class="small muted">No import has run from the UI in this API process (CLI imports are not tracked here).</div>';

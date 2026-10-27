@@ -74,4 +74,4 @@ def doc(**kw) -> dict[str, Any]:
 
 
 # register built-in parsers
-from . import apis, documents, generic, pinksheet  # noqa: E402,F401
+from . import apis, documents, generic, news, pinksheet  # noqa: E402,F401

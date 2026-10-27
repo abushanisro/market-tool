@@ -59,3 +59,23 @@ def test_api_and_guards(seeded):
     for path in ["/api/taxonomy/categories", "/api/market/fx", "/api/market/matrix", "/api/market/labor", "/api/data/issues",
                  "/api/settings", "/api/alerts", "/api/sources", "/"]:
         assert c.get(path).status_code == 200, path
+
+
+def test_process_label_comes_from_file_name_when_no_column():
+    from mip.taxonomy.importer import process_from_filename as f
+
+    assert f("Rapid prototyping/Machines/machines_laser_sintering.csv") == "Laser Sintering"
+    assert f("Die Casting/Machine/high_pressure_die_casting_machines.csv") == "High Pressure Die Casting"
+    assert f("Sheetmetal/machine/all_machines.csv") is None  # nothing meaningful left → stays unspecified, never invented
+
+
+def test_every_imported_machine_has_a_process_group(seeded):
+    from sqlalchemy import func, select
+
+    from mip.db import session_scope
+    from mip.models import Machine
+
+    with session_scope() as s:
+        total = s.execute(select(func.count()).select_from(Machine)).scalar_one()
+        grouped = s.execute(select(func.count()).select_from(Machine).where(Machine.process_name.is_not(None))).scalar_one()
+    assert total > 0 and grouped == total

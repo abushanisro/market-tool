@@ -4,7 +4,7 @@
   const PALETTE = ["#0d9e8a", "#475569", "#d97706", "#2563eb", "#7c3aed", "#e11d48", "#0891b2", "#65a30d"];
   const tip = () => document.getElementById("tip");
   const el = (n, a = {}, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
-  const fmt = (v) => v == null ? "—" : Math.abs(v) >= 1e9 ? (v / 1e9).toFixed(1) + "B" : Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + "M"
+  const fmt = (v) => v == null ? "-" : Math.abs(v) >= 1e9 ? (v / 1e9).toFixed(1) + "B" : Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + "M"
     : Math.abs(v) >= 1e4 ? (v / 1e3).toFixed(0) + "k" : Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 1 ? v.toFixed(2) : v.toPrecision(3);
   function showTip(evt, html) { const t = tip(); t.innerHTML = html; t.style.display = "block"; t.style.left = (evt.clientX + 14) + "px"; t.style.top = (evt.clientY + 12) + "px"; }
   function hideTip() { tip().style.display = "none"; }

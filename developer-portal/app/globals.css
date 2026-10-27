@@ -36,7 +36,7 @@ code, pre, kbd { font-family: var(--mono); }
 .hdr-top { height: var(--header-h); display: flex; align-items: center; gap: 20px; padding: 0 24px; }
 .logo { display: flex; align-items: center; gap: 10px; color: var(--text); font: 600 15px var(--display); white-space: nowrap; }
 .logo:hover { text-decoration: none; }
-.logo-mark { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #0d9e8a, #2dd4bf); color: #fff; display: grid; place-items: center; font: 700 14px var(--display); }
+.logo-mark { width: 28px; height: 28px; border-radius: 7px; display: block; background: #000; flex: none; }
 .logo .sep { color: var(--faint); font-weight: 400; }
 .logo .sub { font: 500 15px var(--font); color: var(--text-2); }
 .search-btn { flex: 0 1 380px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--muted); cursor: pointer; text-align: left; }

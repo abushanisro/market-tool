@@ -47,7 +47,7 @@ export default function Header({ index }: { index: Entry[] }) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
         </button>
         <Link href="/docs/general/introduction" className="logo">
-          <span className="logo-mark">E</span>Emithran<span className="sep">/</span><span className="sub">API Reference</span>
+          <img className="logo-mark" src="/logo.png" alt="" width={28} height={28} />Emithran<span className="sep">/</span><span className="sub">API Reference</span>
         </Link>
         <button className="search-btn" onClick={() => setOpen(true)} aria-label="Search documentation">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>

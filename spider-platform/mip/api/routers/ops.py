@@ -280,7 +280,7 @@ def get_settings_api(s: Session = Depends(get_session)):
         db_url = db_url.split("://")[0] + "://***@" + db_url.split("@", 1)[1]
     return {
         "service": {"database": db_url, "redis_url": bool(cfg.redis_url), "redis_connected": redis_ok,
-                    "data_root": str(cfg.data_root), "data_root_exists": cfg.data_root.exists(),
+                    "data_root": str(cfg.data_root.resolve()), "data_root_exists": cfg.data_root.exists(),
                     "replay_mode": bool(cfg.replay_dir), "embedded_worker": cfg.embedded_worker,
                     "user_agent": cfg.user_agent, "contact_email": cfg.contact_email,
                     "admin_token_required": bool(cfg.admin_token), "last_job_heartbeat": iso(last_hb)},

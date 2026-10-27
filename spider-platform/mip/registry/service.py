@@ -89,8 +89,9 @@ class SourceConfig(BaseModel):
     def _consistency(self):
         if self.status == "active" and self.verification_status not in RUNNABLE_VERIFICATION:
             raise ValueError(f"source with verification_status={self.verification_status} cannot be active")
-        if self.source_type != "internal" and self.status == "active" and not (self.start_urls or self.sitemap_urls):
-            raise ValueError("active sources need start_urls or sitemap_urls")
+        generated = bool((self.extraction or {}).get("url_generator"))            # e.g. gdelt_topics builds its URLs at plan time
+        if self.source_type != "internal" and self.status == "active" and not (self.start_urls or self.sitemap_urls or generated):
+            raise ValueError("active sources need start_urls, sitemap_urls or an extraction.url_generator")
         if self.source_type != "internal" and not self.allowed_domains:
             from urllib.parse import urlparse
 

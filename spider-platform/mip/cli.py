@@ -92,6 +92,13 @@ def cmd_serve(args):
     uvicorn.run("mip.api.main:app", host=args.host, port=args.port, reload=False, log_level="info")
 
 
+def cmd_tag_news(_):
+    from .news.tagging import retag_all
+
+    with session_scope() as s:
+        print(json.dumps(retag_all(s), indent=2))
+
+
 def cmd_evaluate(_):
     from .intelligence.alerts import evaluate_alerts
     from .registry.service import refresh_freshness
@@ -126,6 +133,7 @@ def main(argv=None):
     sp.add_argument("--host", default="0.0.0.0")
     sp.add_argument("--port", type=int, default=8000)
     sp.set_defaults(fn=cmd_serve)
+    sub.add_parser("tag-news", help="re-tag stored news from topics.yaml").set_defaults(fn=cmd_tag_news)
     sub.add_parser("evaluate").set_defaults(fn=cmd_evaluate)
     args = p.parse_args(argv)
     args.fn(args)

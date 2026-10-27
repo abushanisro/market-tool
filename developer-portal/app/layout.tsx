@@ -6,7 +6,7 @@ import { searchIndex } from "@/lib/spec";
 export const metadata: Metadata = {
   title: { default: "Emithran API Reference", template: "%s • API Reference • Emithran" },
   description: "REST API for the Emithran manufacturing taxonomy, materials, machines, processes and market intelligence.",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.png" },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 

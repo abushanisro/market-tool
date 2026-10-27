@@ -43,6 +43,62 @@ def render_template(url: str, params: dict[str, Any]) -> str:
     return out
 
 
+def start_urls_for(source: dict[str, Any], params: dict[str, Any]) -> list[str]:
+    """Start URLs for a job: explicit backfill windows or the source's templated start URLs."""
+    bf = source.get("backfill") or {}
+    if params.get("backfill") and bf.get("url_template"):
+        start = dt.date.fromisoformat(params["start_date"])
+        end = dt.date.fromisoformat(params.get("end_date") or dt.date.today().isoformat())
+        chunk = int(bf.get("chunk_days", 365))
+        urls, cur = [], start
+        while cur <= end:
+            stop = min(end, cur + dt.timedelta(days=chunk - 1))
+            urls.append(render_template(bf["url_template"], {"start_date": cur.isoformat(), "end_date": stop.isoformat()}))
+            cur = stop + dt.timedelta(days=1)
+        return urls
+    gen = (source.get("extraction") or {}).get("url_generator")
+    if gen:                                                    # e.g. gdelt_topics: one request per manufacturing category / country
+        from ...news.collect import generate
+
+        return generate(gen, source.get("extraction") or {}, params)
+    return [render_template(u, params) for u in source.get("start_urls") or []]
+
+
+def next_page_urls(pg: dict[str, Any], response) -> list[tuple[str, int]]:
+    """Follow-up (url, page) pairs for a source's ``pagination`` config; ``response`` is page 1."""
+    try:
+        data = json.loads(response.text)
+    except ValueError:
+        data = None
+    url = response.url
+    max_pages = int(pg.get("max_pages", 5))
+    out: list[tuple[str, int]] = []
+    if pg.get("type") == "page":
+        if pg.get("pages_path"):
+            pages = int(jget(data, pg["pages_path"], 1) or 1)
+        elif pg.get("total_path"):
+            total = int(jget(data, pg["total_path"], 0) or 0)
+            per = int(jget(data, pg.get("per_page_path", ""), 0) or pg.get("size", 25))
+            pages = -(-total // per) if per else 1
+        else:
+            pages = max_pages
+        for p in range(2, min(pages, max_pages) + 1):
+            out.append((_set_param(url, pg.get("param", "page"), p), p))
+    elif pg.get("type") == "offset":
+        total = int(jget(data, pg.get("total_path", ""), 0) or 0)
+        size = int(pg.get("size", 20))
+        for i in range(1, max_pages):
+            off = i * size
+            if off >= total:
+                break
+            out.append((_set_param(url, pg.get("param", "offset"), off), i + 1))
+    elif pg.get("type") == "next_link":
+        nxt = response.css(pg.get("selector", "a[rel=next]::attr(href)")).get()
+        if nxt:
+            out.append((response.urljoin(nxt), 1))
+    return out
+
+
 def snapshot(src: Source) -> dict[str, Any]:
     return {c.name: getattr(src, c.name) for c in Source.__table__.columns}
 
@@ -128,18 +184,7 @@ class RegistrySpider(scrapy.Spider):
 
     # ------------------------------------------------------------------ start
     def start_urls_for_job(self) -> list[str]:
-        bf = self.source.get("backfill") or {}
-        if self.params.get("backfill") and bf.get("url_template"):
-            start = dt.date.fromisoformat(self.params["start_date"])
-            end = dt.date.fromisoformat(self.params.get("end_date") or dt.date.today().isoformat())
-            chunk = int(bf.get("chunk_days", 365))
-            urls, cur = [], start
-            while cur <= end:
-                stop = min(end, cur + dt.timedelta(days=chunk - 1))
-                urls.append(render_template(bf["url_template"], {"start_date": cur.isoformat(), "end_date": stop.isoformat()}))
-                cur = stop + dt.timedelta(days=1)
-            return urls
-        return [render_template(u, self.params) for u in self.source.get("start_urls") or []]
+        return start_urls_for(self.source, self.params)
 
     async def start(self):
         for u in self.source.get("sitemap_urls") or []:
@@ -245,43 +290,10 @@ class RegistrySpider(scrapy.Spider):
         pg = self.source.get("pagination") or {}
         if not pg or response.meta.get("page", 1) != 1 or response.meta.get("parser") not in (None, self.ctx.options.get("parser")):
             return
-        try:
-            data = json.loads(response.text)
-        except ValueError:
-            data = None
-        max_pages = int(pg.get("max_pages", 5))
-        pages = 1
-        if pg.get("type") == "page":
-            if pg.get("pages_path"):
-                pages = int(jget(data, pg["pages_path"], 1) or 1)
-            elif pg.get("total_path"):
-                total = int(jget(data, pg["total_path"], 0) or 0)
-                per = int(jget(data, pg.get("per_page_path", ""), 0) or pg.get("size", 25))
-                pages = -(-total // per) if per else 1
-            else:
-                pages = max_pages
-            for p in range(2, min(pages, max_pages) + 1):
-                r = self.make_request(_set_param(response.request.url, pg.get("param", "page"), p), depth=depth,
-                                      meta={"page": p, "pagination": True})
-                if r:
-                    yield r
-        elif pg.get("type") == "offset":
-            total = int(jget(data, pg.get("total_path", ""), 0) or 0)
-            size = int(pg.get("size", 20))
-            for i in range(1, max_pages):
-                off = i * size
-                if off >= total:
-                    break
-                r = self.make_request(_set_param(response.request.url, pg.get("param", "offset"), off), depth=depth,
-                                      meta={"page": i + 1, "pagination": True})
-                if r:
-                    yield r
-        elif pg.get("type") == "next_link":
-            nxt = response.css(pg.get("selector", "a[rel=next]::attr(href)")).get()
-            if nxt:
-                r = self.make_request(response.urljoin(nxt), depth=depth, meta={"page": 1, "pagination": True})
-                if r:
-                    yield r
+        for url, page in next_page_urls(pg, response):
+            r = self.make_request(url, depth=depth, meta={"page": page, "pagination": True})
+            if r:
+                yield r
 
     def on_error(self, failure):
         req = failure.request

@@ -54,6 +54,30 @@ LABOR_RX = re.compile(r"^(labor rate|labor_rate|skill based labor rate|customwor
 DIRECT_RX = re.compile(r"^(direct overhead|direct_overhead|customworkcenterdirectoverheadrate)", re.I)
 INDIRECT_RX = re.compile(r"^(indirect overhead|indirect_overhead|customworkcenterindirectoverheadrate)", re.I)
 PROCESS_COLS = ["Process Name", "process_name", "Process", "processName", "Name", "name"]
+# Where a machine file states its process / group, best first. Many files have none and name the group only in
+# the file name ("machines_laser_sintering.csv", "trim_presses.csv"), which process_from_filename() recovers.
+MACHINE_PROCESS_COLS = ["Process Name", "Process", "process_name", "process", "processName", "Commodity", "Process Goup",
+                        "Machine Group", "machine_group", "Machine Category", "machine_category", "Category", "category"]
+_FILE_NOISE = re.compile(r"\b(machines?|data|full|batch|all|library|list|table|master|default)\b", re.I)
+
+
+def process_from_filename(rel_path: str) -> str | None:
+    """'Rapid prototyping/Machines/machines_laser_sintering.csv' → 'Laser Sintering'."""
+    stem = Path(rel_path).stem
+    label = " ".join(_FILE_NOISE.sub(" ", re.sub(r"[_\-\.]+", " ", stem)).split())
+    return label.title() if len(label) > 1 else None
+
+# Rate columns are spelled many ways ("Labor Rate (USD / hr)", "accounting.laborRateUsdPerHr", "laborRate_USD_hr",
+# "customWorkCenterDirectOverheadRate", ...). Match on the name with punctuation/case removed; factors, ratios and
+# totals ("Work Center Labor Rate Factor", "laborRatio", "Total Overhead Rate") deliberately do not match.
+LABOR_N = re.compile(r"^(accounting|labor)?(skillbased|customworkcenter)?laborrate(?!factor)")
+DIRECT_N = re.compile(r"^(accounting|customworkcenter)?directoverhead")
+INDIRECT_N = re.compile(r"^(accounting|customworkcenter)?indirectoverhead")
+
+
+def rate_col(columns: list[str], rx: re.Pattern) -> str | None:
+    return next((c for c in columns if rx.search(re.sub(r"[^a-z0-9]", "", c.lower()))), None)
+
 
 # aPriori digital factory release recorded in digital_factory_tree.csv root ("aP2025R1_SP03_F01_(2026-03)")
 RELEASE_RX = re.compile(r"\((\d{4})-(\d{2})\)\)?$")
@@ -371,10 +395,9 @@ class TaxonomyImporter:
         name_col = first_col(columns, MACHINE_NAME_COLS)
         if not name_col:
             return
-        lab = next((c for c in columns if LABOR_RX.search(c.strip())), None)
-        dov = next((c for c in columns if DIRECT_RX.search(c.strip())), None)
-        iov = next((c for c in columns if INDIRECT_RX.search(c.strip())), None)
-        proc_col = first_col(columns, ["Process Name", "Process", "process_name", "Commodity", "Process Goup"])
+        lab, dov, iov = rate_col(columns, LABOR_N), rate_col(columns, DIRECT_N), rate_col(columns, INDIRECT_N)
+        proc_col = first_col(columns, MACHINE_PROCESS_COLS)
+        fallback = process_from_filename(rel)
         out = []
         for row in rows:
             nm = (row.get(name_col) or "").strip()
@@ -383,7 +406,7 @@ class TaxonomyImporter:
             iso, _ = path_country(rel, row)
             out.append({
                 "category_id": cat.id if cat else None, "dataset_id": ds.id, "name": nm[:300],
-                "process_name": (row.get(proc_col) or None) if proc_col else None, "country_iso3": iso,
+                "process_name": ((row.get(proc_col) or "").strip() or fallback) if proc_col else fallback, "country_iso3": iso,
                 "labor_rate_usd_hr": to_float(row.get(lab)) if lab else None,
                 "direct_overhead_usd_hr": to_float(row.get(dov)) if dov else None,
                 "indirect_overhead_usd_hr": to_float(row.get(iov)) if iov else None,

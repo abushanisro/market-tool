@@ -51,7 +51,7 @@ def rss(response, ctx: ParseContext):
         link = (it.findtext("link") or it.findtext("guid") or "").strip()
         if not link:
             continue
-        yield doc(kind=kind, url=link, title=(it.findtext("title") or "").strip(),
+        yield doc(kind=kind, url=link, title=(it.findtext("title") or "").strip(), gate=bool(ctx.options.get("news_gate")),
                   published_at=_date(it.findtext("pubDate")),
                   summary=re.sub(r"<[^>]+>", " ", it.findtext("description") or "").strip()[:600] if store_summary else None,
                   raw={"categories": [c.text for c in it.findall("category") if c.text]})

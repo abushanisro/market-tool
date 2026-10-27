@@ -31,6 +31,16 @@ COUNTRIES: list[tuple[str, str | None, str, str | None, str, bool]] = [
     ("HUN", "HU", "Hungary", "HUF", "Eastern Europe", False),
     ("POL", "PL", "Poland", "PLN", "Eastern Europe", False),
     ("ROU", "RO", "Romania", "RON", "Eastern Europe", False),
+    ("AUT", "AT", "Austria", "EUR", "Western Europe", False),
+    ("IRL", "IE", "Ireland", "EUR", "Western Europe", False),
+    ("PRT", "PT", "Portugal", "EUR", "Western Europe", False),
+    ("GRC", "GR", "Greece", "EUR", "Western Europe", False),
+    ("FIN", "FI", "Finland", "EUR", "Western Europe", False),
+    ("SWE", "SE", "Sweden", "SEK", "Western Europe", False),
+    ("DNK", "DK", "Denmark", "DKK", "Western Europe", False),
+    ("SVK", "SK", "Slovakia", "EUR", "Eastern Europe", False),
+    ("SVN", "SI", "Slovenia", "EUR", "Eastern Europe", False),
+    ("BGR", "BG", "Bulgaria", "BGN", "Eastern Europe", False),
     ("TUR", "TR", "Turkey", "TRY", "Europe/Asia", False),
     ("ZAF", "ZA", "South Africa", "ZAR", "Africa", False),
     ("AUS", "AU", "Australia", "AUD", "Oceania", False),
@@ -58,6 +68,8 @@ _ISO2 = {c[1]: c[0] for c in COUNTRIES if c[1]}
 _ISO3 = {c[0] for c in COUNTRIES}
 CURRENCY_BY_ISO3 = {c[0]: c[3] for c in COUNTRIES}
 NAME_BY_ISO3 = {c[0]: c[2] for c in COUNTRIES}
+# Eurostat codes Greece as "EL" (ISO 3166 is "GR")
+_ISO2["EL"] = "GRC"
 
 
 def _clean(s: str) -> str:

@@ -12,8 +12,10 @@ from fastapi.staticfiles import StaticFiles
 
 from ..config import get_settings
 from ..db import init_db
+from ..fetchapi.router import router as fetcher_router
 from ..publicapi.app import install as install_public_api
-from .routers import intel, ops
+from . import live
+from .routers import agents as agents_router, feed as feed_router, intel, ops
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 log = logging.getLogger("mip.api")
@@ -41,6 +43,10 @@ app.add_middleware(CORSMiddleware, allow_origins=get_settings().cors_origins, al
 install_public_api(app)
 app.include_router(ops.router)
 app.include_router(intel.router)
+app.include_router(fetcher_router)
+app.include_router(live.router)
+app.include_router(agents_router.router)
+app.include_router(feed_router.router)
 app.mount("/assets", StaticFiles(directory=WEB / "assets"), name="assets")
 
 

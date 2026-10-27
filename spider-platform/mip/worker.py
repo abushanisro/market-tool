@@ -111,14 +111,29 @@ class Worker:
                 return
             with session_scope() as s:
                 jobs = claim_jobs(s, free, WORKER_ID)
-                ids = [j.id for j in jobs]
-            for jid in ids:
-                p = subprocess.Popen([sys.executable, "-m", "mip.crawler.run", str(jid)],
-                                     stdout=open(self.cfg.jobs_dir / f"job_{jid}.log", "ab"), stderr=subprocess.STDOUT,
-                                     env={**os.environ}, start_new_session=True)
+                launch = [(j.id, self._command(j)) for j in jobs]
+            for jid, cmd in launch:
+                p = subprocess.Popen(cmd, stdout=open(self.cfg.jobs_dir / f"job_{jid}.log", "ab"),
+                                     stderr=subprocess.STDOUT, env={**os.environ}, start_new_session=True)
                 self.procs[jid] = (p, time.time())
                 self.lock.publish(f'{{"job": {jid}, "event": "started"}}')
                 log.info("started job %s pid=%s", jid, p.pid)
+
+    def _command(self, job: CrawlJob) -> list[str]:
+        """Engine for this job: the Go fetcher when the source opts in and the binary exists, else Scrapy."""
+        if (job.source.extraction or {}).get("fetch_engine") == "go":
+            from .crawler.spiders.registry_spider import snapshot
+            from .fetchapi.router import unsupported
+
+            binary, why = self.cfg.go_fetcher_bin, unsupported(snapshot(job.source))
+            if why:
+                log.warning("source %s wants the go engine but %s — using Scrapy", job.source.slug, why)
+            elif binary and binary.is_file():
+                return [str(binary), "run", "--job", str(job.id), "--api", self.cfg.go_fetcher_api]
+            else:
+                log.warning("source %s wants the go engine but MIP_GO_FETCHER_BIN is %s — using Scrapy",
+                            job.source.slug, "missing" if binary else "unset")
+        return [sys.executable, "-m", "mip.crawler.run", str(job.id)]
 
     def _setting(self, key: str, default):
         """Operator overrides saved from the Settings screen (app_settings table)."""
@@ -157,6 +172,22 @@ class Worker:
         with session_scope() as s:
             evaluate_alerts(s)
 
+    def brain_tick(self) -> None:
+        """Run the agents on a schedule (minutes between runs: setting agents_auto_run_minutes, 0 = off, default 60)."""
+        every = int(self._setting("agents_auto_run_minutes", 60))
+        if every <= 0 or not self.lock.acquire("brain", 120):
+            return
+        from .agents.brain import run_brain
+        from .models import AgentRun
+
+        with session_scope() as s:
+            last = s.execute(select(AgentRun).order_by(AgentRun.id.desc()).limit(1)).scalar_one_or_none()
+            started = last.started_at.replace(tzinfo=dt.timezone.utc) if last and last.started_at.tzinfo is None else (last.started_at if last else None)
+            due = last is None or (last.status != "running" and (dt.datetime.now(dt.timezone.utc) - started).total_seconds() >= every * 60)
+        if due:
+            log.info("scheduled agent run")
+            run_brain("schedule")
+
     # ------------------------------------------------------------------ lifecycle
     def start(self) -> None:
         self.sched.add_job(self.schedule_tick, "interval", seconds=self.cfg.scheduler_tick_seconds, id="schedule",
@@ -164,6 +195,7 @@ class Worker:
         self.sched.add_job(self.dispatch_tick, "interval", seconds=self.cfg.dispatcher_tick_seconds, id="dispatch",
                            max_instances=1, coalesce=True)
         self.sched.add_job(self.recovery_tick, "interval", seconds=60, id="recover", max_instances=1, coalesce=True)
+        self.sched.add_job(self.brain_tick, "interval", minutes=5, id="brain", max_instances=1, coalesce=True)
         self.sched.add_job(self.evaluation_tick, "interval", minutes=15, id="evaluate", max_instances=1, coalesce=True)
         self.sched.start()
         log.info("worker %s started (max_parallel_jobs=%s)", WORKER_ID, self.cfg.max_parallel_jobs)

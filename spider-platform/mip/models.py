@@ -400,6 +400,63 @@ class AppSetting(Base):
     updated_at: Mapped[dt.datetime] = mapped_column(TS, default=utcnow, onupdate=utcnow)
 
 
+# --------------------------------------------------------------------------- agents (Emithran Brain)
+class AgentRun(Base):
+    """One orchestrated run of the specialist agents."""
+
+    __tablename__ = "agent_runs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    trigger: Mapped[str] = mapped_column(String(20), default="manual")  # manual|schedule
+    status: Mapped[str] = mapped_column(String(20), default="running", index=True)  # running|succeeded|partial|failed
+    mode: Mapped[str] = mapped_column(String(10), default="rules")  # rules|llm|mixed
+    started_at: Mapped[dt.datetime] = mapped_column(TS, default=utcnow, index=True)
+    finished_at: Mapped[dt.datetime | None] = mapped_column(TS)
+    agents: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)  # per agent: status, findings, mode, model, seconds, error
+    summary: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)  # risk scores, counts, brief
+    error: Mapped[str | None] = mapped_column(Text)
+
+
+class AgentFinding(Base):
+    """A flag raised by an agent. Upserted by (agent, key) so acknowledgements survive later runs."""
+
+    __tablename__ = "agent_findings"
+    __table_args__ = (UniqueConstraint("agent", "key"), Index("ix_findings_status_sev", "status", "severity"))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    agent: Mapped[str] = mapped_column(String(40), index=True)
+    key: Mapped[str] = mapped_column(String(200))  # stable identity of the issue, e.g. "commodity:copper:uptrend"
+    kind: Mapped[str] = mapped_column(String(20))  # risk|forecast|data_gap|opinion|challenge
+    title: Mapped[str] = mapped_column(String(300))
+    severity: Mapped[str] = mapped_column(String(10), default="info")  # info|low|medium|high|critical
+    confidence: Mapped[float] = mapped_column(Float, default=0.5)
+    summary: Mapped[str] = mapped_column(Text)
+    evidence: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)  # every number the finding rests on
+    entities: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)  # categories / materials / countries affected
+    forecast: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    tags: Mapped[list[str]] = mapped_column(JSON, default=list)  # e.g. "commodity:aluminium" (cross-agent corroboration)
+    analysis: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)  # mode, model, LLM opinion, corroboration, challenges
+    contested: Mapped[bool] = mapped_column(Boolean, default=False)
+    status: Mapped[str] = mapped_column(String(12), default="open", index=True)  # open|ack|dismissed|resolved
+    first_seen: Mapped[dt.datetime] = mapped_column(TS, default=utcnow)
+    last_seen: Mapped[dt.datetime] = mapped_column(TS, default=utcnow, index=True)
+    resolved_at: Mapped[dt.datetime | None] = mapped_column(TS)
+    run_id: Mapped[int | None] = mapped_column(Integer)
+
+
+class AgentEvent(Base):
+    """Append-only history of what the agents did: a flag appeared, got worse, got better, resolved or came back."""
+
+    __tablename__ = "agent_events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ts: Mapped[dt.datetime] = mapped_column(TS, default=utcnow, index=True)
+    run_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    finding_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    agent: Mapped[str] = mapped_column(String(40), index=True)
+    event: Mapped[str] = mapped_column(String(16))  # new|escalated|deescalated|resolved|reopened
+    title: Mapped[str] = mapped_column(String(300))
+    severity: Mapped[str] = mapped_column(String(10))
+    prev_severity: Mapped[str | None] = mapped_column(String(10))
+
+
 # --------------------------------------------------------------------------- public API (v2)
 class ApiClient(Base):
     """OAuth2 client (client-credentials grant). The secret is stored only as a SHA-256 hash."""

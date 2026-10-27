@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     job_timeout_minutes: int = 60
     stale_heartbeat_seconds: int = 180
     auto_pause_after_failures: int = 5
+    # Go fetch worker (sources with extraction.fetch_engine = "go"); unset → those sources fall back to Scrapy
+    go_fetcher_bin: Path | None = Field(default=None, description="Path to the mip-fetch binary")
+    go_fetcher_api: str = Field(default="http://127.0.0.1:8000", description="Control-plane URL the Go worker calls")
     # Replay mode: serve recorded responses for real URLs (tests / offline demo).
     replay_dir: Path | None = None
 

@@ -27,6 +27,7 @@ services:
     command: ["sh", "-c", "sleep 8 && python -m mip.cli worker"]
     environment:
       MIP_DATABASE_URL: postgresql+psycopg://mip:mip@db/mip
+      MIP_GO_FETCHER_API: http://api:8000   # the Go fetch worker reports back to the API container
       MIP_REDIS_URL: redis://redis:6379/0
       MIP_DATA_ROOT: /data/memory
     volumes: ["../memory:/data/memory:ro", "jobs:/app/var/jobs"]

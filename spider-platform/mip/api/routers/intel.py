@@ -58,12 +58,49 @@ def category_detail(slug: str, s: Session = Depends(get_session)):
     return {"slug": c.slug, "name": c.name, "original_folder": c.original_folder, "tree_node_name": c.tree_node_name,
             "family": c.family,
             "datasets": [{"id": d.id, "rel_path": d.rel_path, "role": d.role, "file_type": d.file_type, "rows": d.row_count,
-                          "columns": (d.columns or [])[:40], "country": d.country_iso3} for d in datasets],
+                          "columns": d.columns or [], "country": d.country_iso3} for d in datasets],
             "processes": [{"id": p.id, "name": p.name, "default_machine": p.default_machine,
                            "kinds": (p.attributes or {}).get("kinds", [])} for p in procs],
+            "machine_total": s.execute(select(func.count()).select_from(Machine).where(Machine.category_id == c.id)).scalar_one(),
             "machine_groups": [{"process": p or "(unspecified)", "machines": n, "avg_labor_usd_hr": round(l, 2) if l else None}
                                for p, n, l in mach],
             "material_families": fam, "sources": sources}
+
+
+@router.get("/taxonomy/categories/{slug}/machines")
+def category_machines(slug: str, q: str | None = None, process: str | None = None, offset: int = Query(0, ge=0),
+                      limit: int = Query(50, ge=1, le=200), s: Session = Depends(get_session)):
+    """Machines / work centers of one category with their rates and every spec column kept from the source file.
+
+    ``process`` filters by group ("__none__" = machines whose file names no process). Rates are exactly the values in
+    the source (direct/indirect overhead and labour per hour); nothing is derived or combined here.
+    """
+    c = s.execute(select(Category).where(Category.slug == slug)).scalar_one_or_none()
+    if c is None:
+        raise HTTPException(404, "category not found")
+    base = Machine.category_id == c.id
+    groups = s.execute(select(Machine.process_name, func.count(), func.avg(Machine.labor_rate_usd_hr),
+                              func.avg(Machine.direct_overhead_usd_hr), func.avg(Machine.indirect_overhead_usd_hr))
+                       .where(base).group_by(Machine.process_name).order_by(func.count().desc())).all()
+    cond = [base]
+    if process == "__none__":
+        cond.append(Machine.process_name.is_(None))
+    elif process:
+        cond.append(Machine.process_name == process)
+    if q:
+        like = f"%{q.strip()}%"
+        cond.append(or_(Machine.name.ilike(like), Machine.process_name.ilike(like), cast(Machine.attributes, String).ilike(like)))
+    total = s.execute(select(func.count()).select_from(Machine).where(*cond)).scalar_one()
+    rows = s.execute(select(Machine, Dataset.rel_path).join(Dataset, Dataset.id == Machine.dataset_id, isouter=True)
+                     .where(*cond).order_by(Machine.process_name, Machine.name, Machine.id).offset(offset).limit(limit)).all()
+    r2 = lambda v: round(v, 2) if v is not None else None
+    return {"total": total, "offset": offset, "limit": limit,
+            "groups": [{"process": g or "(unspecified)", "key": g or "__none__", "machines": n, "avg_labor_usd_hr": r2(l),
+                        "avg_direct_overhead_usd_hr": r2(d), "avg_indirect_overhead_usd_hr": r2(i)} for g, n, l, d, i in groups],
+            "items": [{"id": m.id, "name": m.name, "process": m.process_name, "country": m.country_iso3, "file": rel,
+                       "labor_usd_hr": m.labor_rate_usd_hr, "direct_overhead_usd_hr": m.direct_overhead_usd_hr,
+                       "indirect_overhead_usd_hr": m.indirect_overhead_usd_hr, "attributes": m.attributes or {}}
+                      for m, rel in rows]}
 
 
 @router.get("/taxonomy/tree")

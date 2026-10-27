@@ -1,0 +1,84 @@
+# Manufacturing news topics, one per category in the memory/ taxonomy (slugs match `categories.slug`).
+# Keyword rules:  plain entry  = phrase match (word boundaries, plural tolerated)
+#                 "~entry"     = ambiguous word: only counts when the headline also has a generic manufacturing term
+# Edit this file to change what is collected and how it is tagged; collectors read it at plan time (no code change).
+
+categories:
+  additive-manufacturing:   {name: Additive Manufacturing,   keywords: ["additive manufacturing", "3d printing", "3d-printed", "metal 3d printing", "powder bed fusion", "selective laser sintering", "~3d printer"]}
+  rapid-prototyping:        {name: Rapid Prototyping,        keywords: ["rapid prototyping", "prototype manufacturing", "stereolithography", "rapid tooling"]}
+  assembly:                 {name: Assembly,                 keywords: ["assembly line", "assembly plant", "final assembly", "automated assembly", "~assembly"]}
+  assembly-molding:         {name: Assembly Molding,         keywords: ["in-mold assembly", "molded assemblies", "assembly molding", "molding and assembly"]}
+  assembly-plastic-molding: {name: Assembly Plastic Molding, keywords: ["plastic assembly", "plastic assemblies", "ultrasonic welding", "plastic parts assembly", "snap-fit assembly"]}
+  part-assembly:            {name: Part Assembly,            keywords: ["subassembly", "sub-assembly", "contract assembly", "kitting"]}
+  casting:                  {name: Casting,                  keywords: ["metal casting", "metalcasting", "foundry", "foundries", "castings", "cast iron", "~casting"]}
+  die-casting:              {name: Die Casting,              keywords: ["die casting", "die-casting", "diecasting", "die cast", "gigacasting", "giga casting", "megacasting", "mega casting", "giga press", "high pressure die casting", "casting machine"]}
+  investment-casting:       {name: Investment Casting,       keywords: ["investment casting", "lost-wax casting", "lost wax casting", "precision casting"]}
+  sand-casting:             {name: Sand Casting,             keywords: ["sand casting", "green sand", "sand foundry"]}
+  composites:               {name: Composites,               keywords: ["carbon fiber", "carbon fibre", "composite material", "composites manufacturing", "fiberglass", "prepreg", "~composites"]}
+  electronics:              {name: Electronics,              keywords: ["electronics manufacturing", "ems provider", "semiconductor fab", "wire harness", "cable assembly", "electronic components"]}
+  pcba:                     {name: PCBA,                     keywords: ["pcb assembly", "pcba", "printed circuit board", "smt line", "surface mount", "pcb manufacturing"]}
+  heat-treatment:           {name: Heat Treatment,           keywords: ["heat treatment", "heat treating", "annealing", "quenching", "carburizing", "induction hardening"]}
+  secondary-process:        {name: Secondary Process,        keywords: ["deburring", "secondary operations", "finishing operations", "post-processing"]}
+  surface-treatment:        {name: Surface Treatment,        keywords: ["surface treatment", "powder coating", "anodizing", "electroplating", "galvanizing", "surface finishing", "e-coating"]}
+  bar-tube-fabrication:     {name: Bar & Tube Fabrication,   keywords: ["tube fabrication", "tube bending", "bar stock", "tube laser", "pipe fabrication", "tubing manufacturer"]}
+  forging:                  {name: Forging,                  keywords: ["forging plant", "forgings", "forged steel", "closed-die forging", "open-die forging", "forge shop", "forging press", "~forging"]}
+  machining:                {name: Machining,                keywords: ["cnc machining", "machine shop", "machined parts", "precision machining", "cnc machine", "machining center", "~machining", "~cnc"]}
+  multi-spindle-machining:  {name: Multi-Spindle Machining,  keywords: ["multi-spindle", "swiss-type", "swiss machining", "screw machine"]}
+  stock-machining:          {name: Stock Machining,          keywords: ["bar feeder", "stock machining", "turned parts"]}
+  plastic-molding:          {name: Plastic Molding,          keywords: ["injection molding", "injection moulding", "plastic molding", "plastics processing", "mold maker", "molded parts", "thermoplastic molding"]}
+  roto-blow-molding:        {name: Roto & Blow Molding,      keywords: ["blow molding", "blow moulding", "rotational molding", "rotomolding", "pet bottle", "extrusion blow"]}
+  sheet-plastic:            {name: Sheet Plastic (Thermoforming), keywords: ["thermoforming", "vacuum forming", "plastic sheet extrusion"]}
+  two-mold-molding:         {name: 2-Mold Molding,           keywords: ["two-shot molding", "2k molding", "overmolding", "insert molding", "multi-component molding"]}
+  powder-metal:             {name: Powder Metal,             keywords: ["powder metallurgy", "powder metal", "metal injection molding", "sintered parts", "sintering"]}
+  sheet-metal:              {name: Sheet Metal,              keywords: ["sheet metal", "metal stamping", "stamping plant", "press brake", "laser cutting", "metal fabrication", "metal fabricator", "~stamping"]}
+  sheet-metal-hydroforming: {name: Sheet Metal Hydroforming, keywords: ["hydroforming", "hydroformed"]}
+  sheet-metal-roll-forming: {name: Sheet Metal Roll Forming, keywords: ["roll forming", "roll-forming", "roll former"]}
+  sheet-metal-stretch-forming: {name: Sheet Metal Stretch Forming, keywords: ["stretch forming", "stretch-forming"]}
+  sheet-metal-transfer-die: {name: Sheet Metal Transfer Die, keywords: ["transfer die", "progressive die", "die stamping", "tool and die"]}
+
+# Generic manufacturing vocabulary: gates what is relevant at all, and satisfies "~" keywords.
+generic: ["manufactur", "factory", "factories", "production plant", "assembly plant", "fabricat", "foundry", "foundries", "machine shop",
+          "contract manufactur", "industrial production", "oem", "tier 1", "tier-1", "plant closure", "plant expansion", "capacity expansion",
+          "gigafactory", "tooling", "stamping", "cnc", "supply chain", "purchasing managers", "pmi", "industrial output", "reshoring", "nearshoring"]
+
+# Countries that have machine rates in memory/ (ISO3) and the token GDELT's `sourcecountry:` filter expects.
+countries:
+  IND: {gdelt: india}
+  CHN: {gdelt: china}
+  USA: {gdelt: unitedstates}
+  DEU: {gdelt: germany}
+  MEX: {gdelt: mexico}
+  JPN: {gdelt: japan}
+  KOR: {gdelt: southkorea}
+  VNM: {gdelt: vietnam}
+  MYS: {gdelt: malaysia}
+  SGP: {gdelt: singapore}
+  CAN: {gdelt: canada}
+  NLD: {gdelt: netherlands}
+  CZE: {gdelt: czechrepublic}
+  HUN: {gdelt: hungary}
+  FRA: {gdelt: france}
+  ESP: {gdelt: spain}
+  ITA: {gdelt: italy}
+  GBR: {gdelt: unitedkingdom}
+
+# Manufacturing hubs: a headline naming one is tagged with the place and its country.
+places:
+  IND: [Pune, Chennai, Gujarat, Manesar, Gurugram, Bengaluru, Bangalore, Hyderabad, Aurangabad, Coimbatore, Rajkot, Jamshedpur, Sanand, Noida, Faridabad, Ludhiana, Maharashtra, Tamil Nadu, Haryana, Karnataka]
+  CHN: [Shenzhen, Dongguan, Guangdong, Suzhou, Shanghai, Ningbo, Wuhan, Chongqing, Chengdu, Zhejiang, Jiangsu, Foshan, Xiamen, Tianjin, Qingdao, Hefei]
+  USA: [Detroit, Michigan, Ohio, Texas, Alabama, Tennessee, Indiana, Georgia, Kentucky, South Carolina, Pennsylvania, Wisconsin, Illinois, Arizona, Nevada, Mississippi]
+  DEU: [Stuttgart, Bavaria, Baden-Württemberg, Munich, Wolfsburg, Ruhr, Saxony, Dresden, Ingolstadt, Düsseldorf]
+  MEX: [Monterrey, Nuevo León, Querétaro, Guanajuato, Bajío, Tijuana, Juárez, Saltillo, Puebla, Aguascalientes, San Luis Potosí]
+  JPN: [Aichi, Nagoya, Osaka, Toyota City, Yokohama, Hiroshima, Kyushu]
+  KOR: [Ulsan, Changwon, Gyeonggi, Pyeongtaek, Gumi, Incheon]
+  VNM: [Hanoi, Ho Chi Minh, Binh Duong, Hai Phong, Bac Ninh, Dong Nai, Da Nang]
+  MYS: [Penang, Johor, Selangor, Kulim, Melaka]
+  SGP: []
+  CAN: [Ontario, Windsor, Quebec, Alberta, Mississauga, Oshawa]
+  NLD: [Eindhoven, Rotterdam, Brainport]
+  CZE: [Brno, Ostrava, Mladá Boleslav, Plzeň, Kolín]
+  HUN: [Debrecen, Győr, Kecskemét, Budapest]
+  FRA: [Toulouse, Lyon, Alsace]
+  ESP: [Catalonia, Barcelona, Zaragoza, Valencia]
+  ITA: [Lombardy, Turin, Emilia-Romagna, Veneto, Brescia]
+  GBR: [Birmingham, Sheffield, Coventry, Derby]
