@@ -27,8 +27,8 @@ finds where independent agents agree, scores the risk and records every flag wit
 
 ## Models
 
-`mip/agents/providers.yaml` lists OpenAI-compatible endpoints: Ollama and LM Studio (local), OpenRouter, Google AI Studio, NVIDIA NIM, Groq, Cerebras,
-Mistral, Hugging Face. Keys are read from `MIP_KEY_*` environment variables (see `.env.example`), never stored. Model ids are not hard-coded: use
+`emithran/agents/providers.yaml` lists OpenAI-compatible endpoints: Ollama and LM Studio (local), OpenRouter, Google AI Studio, NVIDIA NIM, Groq, Cerebras,
+Mistral, Hugging Face. Keys are read from `EMITHRAN_KEY_*` environment variables (see `.env.example`), never stored. Model ids are not hard-coded: use
 **Model setup -> Discover models** to list each provider's own names, then assign per agent (or for all). Several models per agent act as fallbacks.
 Use different model families for the red team and the analysts to get genuinely different opinions.
 

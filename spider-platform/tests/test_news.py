@@ -12,7 +12,7 @@ NOW = dt.datetime(2026, 10, 27, 16, 40, tzinfo=dt.timezone.utc).isoformat()
 
 # ------------------------------------------------------------------------------------------ classifier
 def test_classifier_tags_category_country_location_and_rejects_noise():
-    from mip.news.classify import classify
+    from emithran.news.classify import classify
 
     t = classify("Tata plans new die casting plant in Pune as India auto output rises", publisher_country="IND")
     assert t.relevant and {"cat:die-casting", "country:IND", "loc:Pune", "pub:IND"} <= set(t.tags)
@@ -29,9 +29,9 @@ def test_classifier_tags_category_country_location_and_rejects_noise():
 
 
 def test_every_taxonomy_category_has_a_news_topic():
-    from mip.db import session_scope
-    from mip.models import Category
-    from mip.news.classify import load_topics
+    from emithran.db import session_scope
+    from emithran.models import Category
+    from emithran.news.classify import load_topics
 
     reference = {"countries-data", "database", "standards"}
     topics = set(load_topics()["cats"])
@@ -46,8 +46,8 @@ def test_every_taxonomy_category_has_a_news_topic():
 def test_gdelt_and_hn_query_generators():
     from urllib.parse import parse_qs, urlparse
 
-    from mip.news.collect import gdelt_hint, gdelt_queries, gdelt_urls, hn_urls
-    from mip.news.classify import load_topics
+    from emithran.news.collect import gdelt_hint, gdelt_queries, gdelt_urls, hn_urls
+    from emithran.news.classify import load_topics
 
     qs = gdelt_queries()
     topics = load_topics()
@@ -67,15 +67,15 @@ def test_gdelt_and_hn_query_generators():
 # ------------------------------------------------------------------------------------------ collectors via the control plane
 @pytest.fixture()
 def client(seeded):
-    from mip.api.main import app
+    from emithran.api.main import app
 
     with TestClient(app) as c:
         yield c
 
 
 def _job(slug):
-    from mip.db import session_scope
-    from mip.jobs.service import claim_jobs, create_job
+    from emithran.db import session_scope
+    from emithran.jobs.service import claim_jobs, create_job
 
     with session_scope() as s:
         jid = create_job(s, slug).id
@@ -90,12 +90,12 @@ def _post(client, jid, url, payload, status=200, ctype="application/json"):
 
 
 def test_gdelt_plan_ingest_filters_tags_and_survives_rate_limit_text(client):
-    from mip.db import session_scope
-    from mip.models import CrawlJob, Document
+    from emithran.db import session_scope
+    from emithran.models import CrawlJob, Document
 
     jid = _job("gdelt-manufacturing-news")
     plan = client.get(f"/api/fetcher/jobs/{jid}/plan").json()
-    from mip.news.collect import gdelt_queries
+    from emithran.news.collect import gdelt_queries
 
     assert len(plan["start_urls"]) == len(gdelt_queries()) and plan["policy"]["download_delay"] >= 10   # one per category and country, polite pace
     url = next(u["url"] for u in plan["start_urls"] if "die" in u["url"] and "casting" in u["url"])
@@ -122,8 +122,8 @@ def test_gdelt_plan_ingest_filters_tags_and_survives_rate_limit_text(client):
 
 
 def test_hackernews_ingest_keeps_manufacturing_only_with_points(client):
-    from mip.db import session_scope
-    from mip.models import Document
+    from emithran.db import session_scope
+    from emithran.models import Document
 
     jid = _job("hackernews-manufacturing")
     client.get(f"/api/fetcher/jobs/{jid}/plan")
@@ -155,8 +155,8 @@ def test_heartbeat_tolerates_null_lists(client):
 
 # ------------------------------------------------------------------------------------------ feed API
 def _docs(n=60):
-    from mip.db import session_scope
-    from mip.models import Document, Source
+    from emithran.db import session_scope
+    from emithran.models import Document, Source
 
     with session_scope() as s:
         sid = s.execute(select(Source.id).where(Source.slug == "gdelt-manufacturing-news")).scalar_one()
@@ -179,8 +179,8 @@ def test_feed_filters_paging_since_and_facets(client):
     assert client.get("/api/feed", params={"q": "Headline 59"}).json()["total"] == 1
     top = f["max_id"]
     _docs(0)
-    from mip.db import session_scope
-    from mip.models import Document, Source
+    from emithran.db import session_scope
+    from emithran.models import Document, Source
 
     with session_scope() as s:
         s.add(Document(source_id=s.execute(select(Source.id).limit(1)).scalar_one(), kind="news", url="https://x.test/new", title="Brand new forging headline",
@@ -196,8 +196,8 @@ def test_feed_filters_paging_since_and_facets(client):
 
 # ------------------------------------------------------------------------------------------ agents: news hotspots and history
 def _risk_news():
-    from mip.db import session_scope
-    from mip.models import Document, Source
+    from emithran.db import session_scope
+    from emithran.models import Document, Source
 
     with session_scope() as s:
         sid = s.execute(select(Source.id).where(Source.slug == "gdelt-manufacturing-news")).scalar_one()
@@ -208,9 +208,9 @@ def _risk_news():
 
 
 def test_news_agent_finds_country_and_category_hotspots_with_corroboration_tags(seeded):
-    from mip.agents.brain import run_brain
-    from mip.db import session_scope
-    from mip.models import AgentFinding
+    from emithran.agents.brain import run_brain
+    from emithran.db import session_scope
+    from emithran.models import AgentFinding
 
     _risk_news()
     run_brain("manual", use_llm=False)
@@ -224,9 +224,9 @@ def test_news_agent_finds_country_and_category_hotspots_with_corroboration_tags(
 
 
 def test_agent_history_keeps_old_flags_and_pages(client):
-    from mip.agents.brain import run_brain
-    from mip.db import session_scope
-    from mip.models import Document
+    from emithran.agents.brain import run_brain
+    from emithran.db import session_scope
+    from emithran.models import Document
 
     _risk_news()
     run_brain("manual", use_llm=False)

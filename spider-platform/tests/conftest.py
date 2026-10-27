@@ -13,11 +13,11 @@ sys.path.insert(0, str(ROOT))
 def db(tmp_path, monkeypatch):
     """Fresh SQLite database per test (Postgres is used in production; models are portable)."""
     url = f"sqlite:///{tmp_path / 'test.db'}"
-    monkeypatch.setenv("MIP_DATABASE_URL", url)
-    monkeypatch.setenv("MIP_DATA_ROOT", str(FIX / "mini_memory"))
-    monkeypatch.setenv("MIP_REPLAY_DIR", str(FIX / "replay"))
-    monkeypatch.setenv("MIP_JOBS_DIR", str(tmp_path / "jobs"))
-    from mip import config, db as dbmod
+    monkeypatch.setenv("EMITHRAN_DATABASE_URL", url)
+    monkeypatch.setenv("EMITHRAN_DATA_ROOT", str(FIX / "mini_memory"))
+    monkeypatch.setenv("EMITHRAN_REPLAY_DIR", str(FIX / "replay"))
+    monkeypatch.setenv("EMITHRAN_JOBS_DIR", str(tmp_path / "jobs"))
+    from emithran import config, db as dbmod
 
     # never let a developer's local .env (admin token, Go binary path, ...) leak into tests
     monkeypatch.setitem(config.Settings.model_config, "env_file", None)
@@ -31,9 +31,9 @@ def db(tmp_path, monkeypatch):
 
 @pytest.fixture()
 def seeded(db):
-    from mip.db import session_scope
-    from mip.registry.service import seed_sources
-    from mip.taxonomy.importer import TaxonomyImporter
+    from emithran.db import session_scope
+    from emithran.registry.service import seed_sources
+    from emithran.taxonomy.importer import TaxonomyImporter
 
     with session_scope() as s:
         seed_sources(s)

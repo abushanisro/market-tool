@@ -6,7 +6,7 @@ from openpyxl import Workbook
 from scrapy.http import HtmlResponse, Request, Response, TextResponse
 
 from conftest import FIX
-from mip.crawler.parsers import PARSERS, Follow, ParseContext
+from emithran.crawler.parsers import PARSERS, Follow, ParseContext
 
 
 def ctx(**opt):

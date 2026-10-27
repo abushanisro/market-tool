@@ -13,7 +13,7 @@ from conftest import FIX
 
 # ------------------------------------------------------------------------------------------ forecasting
 def test_forecast_beats_naive_on_trend_and_refuses_short_history():
-    from mip.agents.forecast import holt_forecast, linear_trend_forecast, volatility_cone
+    from emithran.agents.forecast import holt_forecast, linear_trend_forecast, volatility_cone
 
     random.seed(3)
     y = [100 + 2 * i + random.gauss(0, 1) for i in range(60)]
@@ -31,17 +31,17 @@ def test_forecast_beats_naive_on_trend_and_refuses_short_history():
 
 # ------------------------------------------------------------------------------------------ gateway
 def _gateway(handler):
-    from mip.agents.llm import LLMGateway, Provider
+    from emithran.agents.llm import LLMGateway, Provider
 
     provs = {"local1": Provider("local1", "Local", "http://local/v1", local=True),
-             "hosted": Provider("hosted", "Hosted", "http://hosted/v1", key_env="MIP_KEY_TESTHOSTED", rpm=None)}
+             "hosted": Provider("hosted", "Hosted", "http://hosted/v1", key_env="EMITHRAN_KEY_TESTHOSTED", rpm=None)}
     return LLMGateway(http=httpx.Client(transport=httpx.MockTransport(handler)), providers=provs)
 
 
 def _assign(db, mapping, allow=False):
-    from mip.agents.llm import ALLOW_HOSTED_KEY, ASSIGN_KEY
-    from mip.db import session_scope
-    from mip.models import AppSetting
+    from emithran.agents.llm import ALLOW_HOSTED_KEY, ASSIGN_KEY
+    from emithran.db import session_scope
+    from emithran.models import AppSetting
 
     with session_scope() as s:
         s.merge(AppSetting(key=ASSIGN_KEY, value=mapping))
@@ -53,7 +53,7 @@ def _reply(obj):
 
 
 def test_gateway_falls_back_and_blocks_hosted_for_internal(db, monkeypatch):
-    monkeypatch.setenv("MIP_KEY_TESTHOSTED", "k")
+    monkeypatch.setenv("EMITHRAN_KEY_TESTHOSTED", "k")
     calls = []
 
     def handler(req):
@@ -85,8 +85,8 @@ def test_gateway_without_key_or_assignment_is_silent(db):
 
 # ------------------------------------------------------------------------------------------ data helpers
 def _seed_series(slug="worldbank-pink-sheet", kind="price", entity="Copper", unit="$/mt", months=72, start=5000.0, growth=0.04, country="WLD"):
-    from mip.db import session_scope
-    from mip.models import Observation, Source
+    from emithran.db import session_scope
+    from emithran.models import Observation, Source
 
     with session_scope() as s:
         sid = s.execute(select(Source.id).where(Source.slug == slug)).scalar_one()
@@ -101,9 +101,9 @@ def _seed_series(slug="worldbank-pink-sheet", kind="price", entity="Copper", uni
 
 
 def _run(use_llm=False, gateway=None):
-    from mip.agents.brain import run_brain
-    from mip.db import session_scope
-    from mip.models import AgentRun
+    from emithran.agents.brain import run_brain
+    from emithran.db import session_scope
+    from emithran.models import AgentRun
 
     rid = run_brain("manual", use_llm=use_llm, gateway=gateway)
     with session_scope() as s:
@@ -111,8 +111,8 @@ def _run(use_llm=False, gateway=None):
 
 
 def _findings(**kw):
-    from mip.db import session_scope
-    from mip.models import AgentFinding
+    from emithran.db import session_scope
+    from emithran.models import AgentFinding
 
     with session_scope() as s:
         q = select(AgentFinding)
@@ -136,8 +136,8 @@ def test_commodity_agent_flags_move_with_evidence_and_honest_forecast(seeded):
 
 
 def test_flag_lifecycle_ack_survives_rerun_and_resolves_when_gone(seeded):
-    from mip.db import session_scope
-    from mip.models import AgentFinding, Observation
+    from emithran.db import session_scope
+    from emithran.models import AgentFinding, Observation
 
     _seed_series()
     _run()
@@ -156,7 +156,7 @@ def test_flag_lifecycle_ack_survives_rerun_and_resolves_when_gone(seeded):
 
 
 def test_agent_failure_is_isolated_and_recorded(seeded, monkeypatch):
-    from mip.agents import numeric_agents
+    from emithran.agents import numeric_agents
 
     monkeypatch.setattr(numeric_agents.FXAgent, "collect", lambda self, ctx: (_ for _ in ()).throw(RuntimeError("boom")))
     _, run = _run()
@@ -185,7 +185,7 @@ def test_data_quality_agent_reports_real_gaps(seeded):
 
 # ------------------------------------------------------------------------------------------ LLM grounding
 def test_llm_opinion_is_grounded_clamped_and_hosted_blocked_for_internal(seeded, monkeypatch):
-    monkeypatch.setenv("MIP_KEY_TESTHOSTED", "k")
+    monkeypatch.setenv("EMITHRAN_KEY_TESTHOSTED", "k")
     _seed_series()
     seen = []
 
@@ -220,7 +220,7 @@ def test_llm_opinion_is_grounded_clamped_and_hosted_blocked_for_internal(seeded,
 # ------------------------------------------------------------------------------------------ API
 @pytest.fixture()
 def client(seeded):
-    from mip.api.main import app
+    from emithran.api.main import app
 
     with TestClient(app) as c:
         yield c
@@ -261,16 +261,16 @@ def test_api_run_overview_findings_status_and_llm_setup(client):
     ok = client.post("/api/agents/llm/assign", json={"assignments": {"*": [{"provider": "ollama", "model": "gemma"}]}, "allow_hosted_internal": False})
     assert ok.status_code == 200 and ok.json()["assignments"]["*"][0]["model"] == "gemma"
     keys = json.dumps(client.get("/api/agents/llm").json())
-    assert "MIP_KEY_OPENROUTER" in keys and "key_present" in keys                  # variable names and presence only, never values
+    assert "EMITHRAN_KEY_OPENROUTER" in keys and "key_present" in keys                  # variable names and presence only, never values
 
 
 def test_run_endpoint_rejects_concurrent_runs_and_requires_admin(client, monkeypatch):
-    from mip import config
-    from mip.agents.brain import start_run
+    from emithran import config
+    from emithran.agents.brain import start_run
 
     start_run("manual")                                                             # a run is already in progress
     assert client.post("/api/agents/run", json={}).status_code == 409
-    monkeypatch.setenv("MIP_ADMIN_TOKEN", "s3")
+    monkeypatch.setenv("EMITHRAN_ADMIN_TOKEN", "s3")
     config.get_settings.cache_clear()
     assert client.post("/api/agents/run", json={}).status_code == 401
     assert client.post("/api/agents/llm/assign", json={}).status_code == 401

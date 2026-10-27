@@ -21,7 +21,7 @@ type replayRecord struct {
 }
 
 // Replay serves recorded responses instead of touching the network — same index.json format as the
-// Scrapy ReplayMiddleware (MIP_REPLAY_DIR), so both engines can run against one set of fixtures.
+// Scrapy ReplayMiddleware (EMITHRAN_REPLAY_DIR), so both engines can run against one set of fixtures.
 // Unknown URLs get a synthetic 404; robots.txt is 404 unless recorded.
 type Replay struct {
 	root  string
@@ -75,6 +75,6 @@ func (r *Replay) RoundTrip(req *http.Request) (*http.Response, error) {
 		}
 	}
 	enc, _ := json.Marshal(meta)
-	out.Header.Set("X-Mip-Replay", string(enc))
+	out.Header.Set("X-Emithran-Replay", string(enc))
 	return out, nil
 }

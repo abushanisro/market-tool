@@ -5,8 +5,8 @@ from conftest import FIX
 
 
 def test_import_mini_taxonomy(seeded):
-    from mip.db import session_scope
-    from mip.models import Category, Dataset, Machine, Material, Observation, Process, UnresolvedIdentifier
+    from emithran.db import session_scope
+    from emithran.models import Category, Dataset, Machine, Material, Observation, Process, UnresolvedIdentifier
 
     with session_scope() as s:
         cat = s.execute(select(Category).where(Category.slug == "die-casting")).scalar_one()
@@ -26,14 +26,14 @@ def test_import_mini_taxonomy(seeded):
         mhr = s.execute(select(UnresolvedIdentifier).where(UnresolvedIdentifier.code == "MHR")).scalar_one()
         assert mhr.status == "unresolved" and mhr.occurrences == 2 and mhr.confirmed_definition is None
     # idempotent: unchanged files are skipped
-    from mip.taxonomy.importer import TaxonomyImporter
+    from emithran.taxonomy.importer import TaxonomyImporter
     with session_scope() as s:
         stats = TaxonomyImporter(s, FIX / "mini_memory").run()
         assert stats.get("files_imported", 0) == 0 and stats["files_unchanged"] >= 5
 
 
 def test_api_and_guards(seeded):
-    from mip.api.main import app
+    from emithran.api.main import app
 
     c = TestClient(app)
     ov = c.get("/api/overview").json()
@@ -62,7 +62,7 @@ def test_api_and_guards(seeded):
 
 
 def test_process_label_comes_from_file_name_when_no_column():
-    from mip.taxonomy.importer import process_from_filename as f
+    from emithran.taxonomy.importer import process_from_filename as f
 
     assert f("Rapid prototyping/Machines/machines_laser_sintering.csv") == "Laser Sintering"
     assert f("Die Casting/Machine/high_pressure_die_casting_machines.csv") == "High Pressure Die Casting"
@@ -72,8 +72,8 @@ def test_process_label_comes_from_file_name_when_no_column():
 def test_every_imported_machine_has_a_process_group(seeded):
     from sqlalchemy import func, select
 
-    from mip.db import session_scope
-    from mip.models import Machine
+    from emithran.db import session_scope
+    from emithran.models import Machine
 
     with session_scope() as s:
         total = s.execute(select(func.count()).select_from(Machine)).scalar_one()

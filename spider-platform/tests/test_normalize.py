@@ -1,10 +1,10 @@
 import datetime as dt
 
-from mip.normalize.countries import to_iso3
-from mip.normalize.materials import classify_family, extract_grade, material_key, normalize_property_header
-from mip.normalize.quality import assess
-from mip.normalize.units import parse_price_unit, to_float, unit_from_header
-from mip.store import parse_date
+from emithran.normalize.countries import to_iso3
+from emithran.normalize.materials import classify_family, extract_grade, material_key, normalize_property_header
+from emithran.normalize.quality import assess
+from emithran.normalize.units import parse_price_unit, to_float, unit_from_header
+from emithran.store import parse_date
 
 
 def test_units():
@@ -56,7 +56,7 @@ def test_quality_rules():
 
 
 def test_eurostat_country_codes_map_to_iso3():
-    from mip.normalize.countries import to_iso3
+    from emithran.normalize.countries import to_iso3
 
     assert to_iso3("EL") == "GRC" and to_iso3("UK") == "GBR"   # Eurostat's own codes
     assert to_iso3("GR") == "GRC" and to_iso3("DE") == "DEU"

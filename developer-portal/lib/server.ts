@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 
-export const API_URL = (process.env.MIP_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
+export const API_URL = (process.env.EMITHRAN_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 export const ADMIN_COOKIE = "emithran_admin";
 
 export async function adminToken(): Promise<string | null> {

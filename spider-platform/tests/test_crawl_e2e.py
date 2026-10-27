@@ -13,21 +13,21 @@ from conftest import ROOT
 
 
 def run(job_id):
-    return subprocess.run([sys.executable, "-m", "mip.crawler.run", str(job_id)], cwd=ROOT, env={**os.environ},
+    return subprocess.run([sys.executable, "-m", "emithran.crawler.run", str(job_id)], cwd=ROOT, env={**os.environ},
                           capture_output=True, text=True, timeout=120)
 
 
 def queue(source, params=None):
-    from mip.db import session_scope
-    from mip.jobs.service import create_job
+    from emithran.db import session_scope
+    from emithran.jobs.service import create_job
 
     with session_scope() as s:
         return create_job(s, source, params=params or {}).id
 
 
 def job(job_id):
-    from mip.db import session_scope
-    from mip.models import CrawlJob
+    from emithran.db import session_scope
+    from emithran.models import CrawlJob
 
     with session_scope() as s:
         j = s.get(CrawlJob, job_id)
@@ -35,8 +35,8 @@ def job(job_id):
 
 
 def test_fx_crawl_incremental_and_backfill(seeded):
-    from mip.db import session_scope
-    from mip.models import CrawlUrl, Observation, Source
+    from emithran.db import session_scope
+    from emithran.models import CrawlUrl, Observation, Source
 
     j1 = queue("frankfurter-fx")
     p = run(j1)
@@ -61,7 +61,7 @@ def test_fx_crawl_incremental_and_backfill(seeded):
         src = s.execute(select(Source).where(Source.slug == "frankfurter-fx")).scalar_one()
         assert src.consecutive_failures == 0 and src.last_success_at is not None
         # internal-table prices are now converted with crawled FX in later imports
-        from mip.normalize.currency import FxConverter
+        from emithran.normalize.currency import FxConverter
         assert FxConverter(s).usd_rate("INR").rate == 95.12
 
 
@@ -78,8 +78,8 @@ def test_failure_isolation_and_partial(seeded):
 
 
 def test_rss_documents(seeded):
-    from mip.db import session_scope
-    from mip.models import Document
+    from emithran.db import session_scope
+    from emithran.models import Document
 
     j = queue("manufacturingdive-news")
     run(j)

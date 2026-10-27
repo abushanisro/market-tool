@@ -1,4 +1,4 @@
-module emithran.com/mip/fetcher
+module emithran.com/fetcher
 
 go 1.27
 

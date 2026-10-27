@@ -50,7 +50,7 @@ type Plan struct {
 	Policy      Policy                `json:"policy"`
 }
 
-// Page is one fetched URL as the platform expects it (see mip/fetchapi/ingest.py PageIn).
+// Page is one fetched URL as the platform expects it (see emithran/fetchapi/ingest.py PageIn).
 type Page struct {
 	URL          string            `json:"url"`
 	Depth        int               `json:"depth"`

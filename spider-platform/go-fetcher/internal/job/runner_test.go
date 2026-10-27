@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"emithran.com/mip/fetcher/internal/api"
+	"emithran.com/fetcher/internal/api"
 )
 
 // fakeCP stands in for the Python control plane.

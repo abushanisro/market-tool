@@ -15,15 +15,15 @@ NOW = dt.datetime(2026, 10, 27, 16, 40, tzinfo=dt.timezone.utc).isoformat()
 
 @pytest.fixture()
 def client(seeded):
-    from mip.api.main import app
+    from emithran.api.main import app
 
     with TestClient(app) as c:
         yield c
 
 
 def claimed_job(slug="frankfurter-fx", params=None) -> int:
-    from mip.db import session_scope
-    from mip.jobs.service import claim_jobs, create_job
+    from emithran.db import session_scope
+    from emithran.jobs.service import claim_jobs, create_job
 
     with session_scope() as s:
         jid = create_job(s, slug, params=params or {}).id
@@ -43,8 +43,8 @@ def page(url=FX_URL, file="frankfurter_latest_usd.json", **kw):
 
 
 def job_row(jid):
-    from mip.db import session_scope
-    from mip.models import CrawlJob
+    from emithran.db import session_scope
+    from emithran.models import CrawlJob
 
     with session_scope() as s:
         j = s.get(CrawlJob, jid)
@@ -81,16 +81,16 @@ def test_plan_returns_checkpoints_from_previous_runs(client):
 
 
 def test_plan_refuses_unclaimed_and_unsupported_sources(client):
-    from mip.db import session_scope
-    from mip.jobs.service import create_job
-    from mip.models import Source
+    from emithran.db import session_scope
+    from emithran.jobs.service import create_job
+    from emithran.models import Source
 
     with session_scope() as s:
         queued = create_job(s, "frankfurter-fx").id
     assert client.get(f"/api/fetcher/jobs/{queued}/plan").status_code == 409  # still queued: nobody claimed it
     assert client.get("/api/fetcher/jobs/9999/plan").status_code == 404
     with session_scope() as s:
-        from mip.jobs.service import cancel_job
+        from emithran.jobs.service import cancel_job
         cancel_job(s, queued)
 
     with session_scope() as s:
@@ -101,8 +101,8 @@ def test_plan_refuses_unclaimed_and_unsupported_sources(client):
 
 
 def test_pages_are_parsed_and_stored_like_scrapy(client):
-    from mip.db import session_scope
-    from mip.models import CrawlUrl, Observation
+    from emithran.db import session_scope
+    from emithran.models import CrawlUrl, Observation
 
     jid = claimed_job()
     client.get(f"/api/fetcher/jobs/{jid}/plan")
@@ -128,8 +128,8 @@ def test_pages_are_parsed_and_stored_like_scrapy(client):
 
 
 def test_unchanged_not_modified_and_failed_pages_only_touch_checkpoints(client):
-    from mip.db import session_scope
-    from mip.models import CrawlLog, CrawlUrl, Observation
+    from emithran.db import session_scope
+    from emithran.models import CrawlLog, CrawlUrl, Observation
 
     jid = claimed_job()
     client.get(f"/api/fetcher/jobs/{jid}/plan")
@@ -167,8 +167,8 @@ def test_pagination_follow_urls_use_the_shared_logic(client):
 
 
 def test_parser_follow_links_are_scope_checked(client):
-    from mip.db import session_scope
-    from mip.models import Source
+    from emithran.db import session_scope
+    from emithran.models import Source
 
     with session_scope() as s:  # a source whose parser yields Follow links (RSS article fetch) with depth 0 allowed only
         src = s.execute(select(Source).where(Source.slug == "manufacturingdive-news")).scalar_one()
@@ -184,8 +184,8 @@ def test_parser_follow_links_are_scope_checked(client):
 
 
 def test_bad_payload_is_a_recorded_processing_error_not_a_500(client):
-    from mip.db import session_scope
-    from mip.models import CrawlUrl
+    from emithran.db import session_scope
+    from emithran.models import CrawlUrl
 
     jid = claimed_job()
     client.get(f"/api/fetcher/jobs/{jid}/plan")
@@ -200,8 +200,8 @@ def test_bad_payload_is_a_recorded_processing_error_not_a_500(client):
 
 
 def test_validation_rules_apply(client):
-    from mip.db import session_scope
-    from mip.models import Source
+    from emithran.db import session_scope
+    from emithran.models import Source
 
     with session_scope() as s:
         s.execute(select(Source).where(Source.slug == "frankfurter-fx")).scalar_one().validation = {"max": 50}
@@ -213,9 +213,9 @@ def test_validation_rules_apply(client):
 
 
 def test_heartbeat_merges_only_fetcher_stats_and_signals_cancel(client):
-    from mip.db import session_scope
-    from mip.jobs.service import cancel_job
-    from mip.models import CrawlLog
+    from emithran.db import session_scope
+    from emithran.jobs.service import cancel_job
+    from emithran.models import CrawlLog
 
     jid = claimed_job()
     client.get(f"/api/fetcher/jobs/{jid}/plan")
@@ -236,8 +236,8 @@ def test_finish_uses_the_same_status_rules_as_scrapy(client):
     client.post(f"/api/fetcher/jobs/{ok}/pages", json={"pages": [page()]})
     r = client.post(f"/api/fetcher/jobs/{ok}/finish", json={"reason": "finished", "stats": {"pages_fetched": 1}})
     assert r.json() == {"status": "succeeded"}
-    from mip.db import session_scope
-    from mip.models import Source
+    from emithran.db import session_scope
+    from emithran.models import Source
     with session_scope() as s:
         src = s.execute(select(Source).where(Source.slug == "frankfurter-fx")).scalar_one()
         assert src.last_success_at is not None and src.last_records == 29 and src.consecutive_failures == 0
@@ -261,9 +261,9 @@ def test_finished_jobs_reject_further_pages(client):
 
 
 def test_admin_token_is_required_when_configured(client, monkeypatch):
-    from mip import config
+    from emithran import config
 
-    monkeypatch.setenv("MIP_ADMIN_TOKEN", "s3cret")
+    monkeypatch.setenv("EMITHRAN_ADMIN_TOKEN", "s3cret")
     config.get_settings.cache_clear()
     jid = claimed_job()
     assert client.get(f"/api/fetcher/jobs/{jid}/plan").status_code == 401
@@ -272,12 +272,12 @@ def test_admin_token_is_required_when_configured(client, monkeypatch):
 
 
 def test_worker_picks_engine_per_source(seeded, tmp_path, monkeypatch):
-    from mip import config
-    from mip.db import session_scope
-    from mip.models import CrawlJob, Source
-    from mip.worker import Worker
+    from emithran import config
+    from emithran.db import session_scope
+    from emithran.models import CrawlJob, Source
+    from emithran.worker import Worker
 
-    fake = tmp_path / "mip-fetch"
+    fake = tmp_path / "emithran-fetch"
     fake.write_text("#!/bin/sh\n")
     fake.chmod(0o755)
     with session_scope() as s:
@@ -288,24 +288,24 @@ def test_worker_picks_engine_per_source(seeded, tmp_path, monkeypatch):
         with session_scope() as s:
             return Worker()._command(s.get(CrawlJob, jid))
 
-    assert command(fx)[1:3] == ["-m", "mip.crawler.run"]  # binary not configured → Scrapy fallback
-    monkeypatch.setenv("MIP_GO_FETCHER_BIN", str(fake))
-    monkeypatch.setenv("MIP_GO_FETCHER_API", "http://127.0.0.1:9")
+    assert command(fx)[1:3] == ["-m", "emithran.crawler.run"]  # binary not configured → Scrapy fallback
+    monkeypatch.setenv("EMITHRAN_GO_FETCHER_BIN", str(fake))
+    monkeypatch.setenv("EMITHRAN_GO_FETCHER_API", "http://127.0.0.1:9")
     config.get_settings.cache_clear()
     assert command(fx) == [str(fake), "run", "--job", str(fx), "--api", "http://127.0.0.1:9"]
-    assert command(wb)[1:3] == ["-m", "mip.crawler.run"]
+    assert command(wb)[1:3] == ["-m", "emithran.crawler.run"]
     with session_scope() as s:  # a Go-flagged source needing a Scrapy-only feature falls back too
         s.execute(select(Source).where(Source.slug == "frankfurter-fx")).scalar_one().render_js = True
-    assert command(fx)[1:3] == ["-m", "mip.crawler.run"]
+    assert command(fx)[1:3] == ["-m", "emithran.crawler.run"]
 
 
 def test_live_feed_reports_changes(client):
     """The SSE feed emits a change event, and its version moves when a job is queued (what dashboards redraw on)."""
     import json
 
-    from mip.api.live import live_version
-    from mip.db import session_scope
-    from mip.jobs.service import create_job
+    from emithran.api.live import live_version
+    from emithran.db import session_scope
+    from emithran.jobs.service import create_job
 
     before = live_version()
     with client.stream("GET", "/api/stream?once=true") as r:

@@ -1,4 +1,4 @@
-"""Go fetch worker end to end: real API server + real ``mip-fetch`` binary, launched by the real Worker.
+"""Go fetch worker end to end: real API server + real ``emithran-fetch`` binary, launched by the real Worker.
 
 Network is replaced by the recorded responses in tests/fixtures/replay (both engines read the same
 index), so results must match the Scrapy engine's numbers in test_crawl_e2e.py exactly.
@@ -24,8 +24,8 @@ pytestmark = pytest.mark.skipif(GO is None, reason="Go toolchain not installed")
 
 @pytest.fixture(scope="session")
 def fetcher_bin(tmp_path_factory):
-    out = tmp_path_factory.mktemp("gobin") / "mip-fetch"
-    r = subprocess.run([GO, "build", "-o", str(out), "./cmd/mip-fetch"], cwd=ROOT / "go-fetcher", capture_output=True, text=True)
+    out = tmp_path_factory.mktemp("gobin") / "emithran-fetch"
+    r = subprocess.run([GO, "build", "-o", str(out), "./cmd/emithran-fetch"], cwd=ROOT / "go-fetcher", capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     return out
 
@@ -37,13 +37,13 @@ def server(seeded, fetcher_bin, monkeypatch):
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
     api = f"http://127.0.0.1:{port}"
-    monkeypatch.setenv("MIP_ADMIN_TOKEN", "")  # the spawned server would otherwise read a developer .env from cwd
-    monkeypatch.setenv("MIP_GO_FETCHER_BIN", str(fetcher_bin))
-    monkeypatch.setenv("MIP_GO_FETCHER_API", api)
-    from mip import config
+    monkeypatch.setenv("EMITHRAN_ADMIN_TOKEN", "")  # the spawned server would otherwise read a developer .env from cwd
+    monkeypatch.setenv("EMITHRAN_GO_FETCHER_BIN", str(fetcher_bin))
+    monkeypatch.setenv("EMITHRAN_GO_FETCHER_API", api)
+    from emithran import config
 
     config.get_settings.cache_clear()
-    proc = subprocess.Popen([sys.executable, "-m", "mip.cli", "serve", "--host", "127.0.0.1", "--port", str(port)],
+    proc = subprocess.Popen([sys.executable, "-m", "emithran.cli", "serve", "--host", "127.0.0.1", "--port", str(port)],
                             cwd=ROOT, env={**os.environ}, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         for _ in range(100):
@@ -64,11 +64,11 @@ def server(seeded, fetcher_bin, monkeypatch):
 
 def run_via_worker(source, params=None):
     """Queue a job and let the real Worker dispatch it; returns (status, stats, error, log text)."""
-    from mip.config import get_settings
-    from mip.db import session_scope
-    from mip.jobs.service import create_job
-    from mip.models import CrawlJob
-    from mip.worker import Worker
+    from emithran.config import get_settings
+    from emithran.db import session_scope
+    from emithran.jobs.service import create_job
+    from emithran.models import CrawlJob
+    from emithran.worker import Worker
 
     with session_scope() as s:
         jid = create_job(s, source, params=params or {}).id
@@ -76,7 +76,7 @@ def run_via_worker(source, params=None):
     w.dispatch_tick()
     assert jid in w.procs, "worker did not launch the job"
     proc, _ = w.procs[jid]
-    assert "mip-fetch" in proc.args[0], f"expected the Go binary, launched {proc.args}"
+    assert "emithran-fetch" in proc.args[0], f"expected the Go binary, launched {proc.args}"
     proc.wait(timeout=90)
     w.dispatch_tick()  # reaps
     with session_scope() as s:
@@ -85,8 +85,8 @@ def run_via_worker(source, params=None):
 
 
 def test_fx_crawl_incremental_and_backfill_matches_scrapy(server):
-    from mip.db import session_scope
-    from mip.models import CrawlLog, CrawlUrl, Observation
+    from emithran.db import session_scope
+    from emithran.models import CrawlLog, CrawlUrl, Observation
 
     status, stats, err, log = run_via_worker("frankfurter-fx")
     assert status == "succeeded", (err, log[-2000:])
@@ -122,8 +122,8 @@ def test_rss_and_worldbank_through_go(server):
 
 
 def test_all_urls_failing_marks_the_job_failed_and_trips_nothing_silently(server):
-    from mip.db import session_scope
-    from mip.models import Source
+    from emithran.db import session_scope
+    from emithran.models import Source
 
     with session_scope() as s:
         src = s.execute(select(Source).where(Source.slug == "un-comtrade-preview")).scalar_one()

@@ -7,7 +7,7 @@ manufacturing hub. UI: *Manufacturing News*. API: `GET /api/feed`, `GET /api/fee
 
 | Source | What it gives | Pace |
 |---|---|---|
-| GDELT DOC API | one query per taxonomy category (from `mip/news/topics.yaml`) and one per country (`sourcecountry:`), English sources | every 15 min, 10 s between requests (GDELT asks for 1 per 5 s) |
+| GDELT DOC API | one query per taxonomy category (from `emithran/news/topics.yaml`) and one per country (`sourcecountry:`), English sources | every 15 min, 10 s between requests (GDELT asks for 1 per 5 s) |
 | Hacker News (Algolia) | discussions matching each category's keywords, last 90 days, with points and comment counts | every 15 min |
 | Supply Chain Dive, Manufacturing Dive | trade-press RSS | every 15 min |
 | NIST manufacturing news | government RSS | hourly |
@@ -16,7 +16,7 @@ The registry refuses polling faster than every 15 minutes (a politeness guard); 
 
 ## What "only manufacturing" means
 
-Every headline, whatever its source, goes through `mip/news/classify.py` before it is stored. It is rules, not a model, so the same headline always
+Every headline, whatever its source, goes through `emithran/news/classify.py` before it is stored. It is rules, not a model, so the same headline always
 gets the same tags and each tag can be traced to the words that caused it:
 
 * `cat:<slug>` a taxonomy category (e.g. `die-casting`); ambiguous words ("casting", "forging", "assembly") only count with manufacturing context.
@@ -25,7 +25,7 @@ gets the same tags and each tag can be traced to the words that caused it:
   manufacturing publications are trusted, as are trade-media domains.
 
 Edit `topics.yaml` to change categories, keywords, countries and hubs; collectors read it when they plan a run. Re-tag stored headlines with
-`python -m mip.cli tag-news`.
+`python -m emithran.cli tag-news`.
 
 ## Live behaviour and history
 

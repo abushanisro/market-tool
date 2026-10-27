@@ -17,12 +17,12 @@ brand (Sora / Inter / JetBrains Mono, teal `#0D9E8A` on ink `#0D1117`, light + d
 
 ```bash
 npm ci
-cp .env.example .env.local        # MIP_API_URL = the FastAPI service, NEXT_PUBLIC_API_BASE_URL = URL shown in samples
+cp .env.example .env.local        # EMITHRAN_API_URL = the FastAPI service, NEXT_PUBLIC_API_BASE_URL = URL shown in samples
 npm run dev                       # http://localhost:3000
 npm run build && npm start        # production
 ```
 
-Docker: `docker build -t emithran-portal . && docker run -p 3000:3000 -e MIP_API_URL=http://api:8000 emithran-portal`
+Docker: `docker build -t emithran-portal . && docker run -p 3000:3000 -e EMITHRAN_API_URL=http://api:8000 emithran-portal`
 (or use the `portal` service in `spider-platform/docker-compose.yml`).
 
 ## Keeping docs in sync with the API
@@ -31,7 +31,7 @@ Docker: `docker build -t emithran-portal . && docker run -p 3000:3000 -e MIP_API
 
 ```bash
 # in spider-platform (needs the imported database)
-MIP_ADMIN_TOKEN=... python scripts/export_api_docs.py ../developer-portal/content   # spec + object types + real examples
+EMITHRAN_ADMIN_TOKEN=... python scripts/export_api_docs.py ../developer-portal/content   # spec + object types + real examples
 # or, spec and error catalogue only, from a running API:
 npm run sync-spec
 ```

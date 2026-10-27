@@ -7,12 +7,12 @@ ADMIN = {"X-Admin-Token": "t0k"}
 
 @pytest.fixture()
 def api(seeded, monkeypatch):
-    monkeypatch.setenv("MIP_ADMIN_TOKEN", "t0k")
-    from mip import config
+    monkeypatch.setenv("EMITHRAN_ADMIN_TOKEN", "t0k")
+    from emithran import config
     config.get_settings.cache_clear()
-    import mip.publicapi.auth as auth
+    import emithran.publicapi.auth as auth
     auth._secret_cache = None
-    from mip.api.main import app
+    from emithran.api.main import app
     return TestClient(app, raise_server_exceptions=False)
 
 

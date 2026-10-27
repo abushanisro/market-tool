@@ -1,9 +1,9 @@
-"""Alembic environment — URL comes from MIP_DATABASE_URL (same as the service)."""
+"""Alembic environment — URL comes from EMITHRAN_DATABASE_URL (same as the service)."""
 from alembic import context
 
-from mip import models  # noqa: F401
-from mip.config import get_settings
-from mip.db import Base, engine
+from emithran import models  # noqa: F401
+from emithran.config import get_settings
+from emithran.db import Base, engine
 
 target_metadata = Base.metadata
 

@@ -1,18 +1,18 @@
-# Emithran MIP — Manufacturing Data Spider & Market Intelligence
+# Emithran — Manufacturing Data Spider & Market Intelligence
 
 An independently deployable service that imports the existing manufacturing taxonomy (`../memory`),
 discovers and crawls **permitted** public sources, normalizes everything into one provenance-tracked
 database, and serves an 8-screen enterprise dashboard.
 
 ```
-                ┌──────────── FastAPI (mip.api) ─────────────┐      ┌─ UI (mip/web, no build step)
+                ┌──────────── FastAPI (emithran.api) ─────────────┐      ┌─ UI (emithran/web, no build step)
   memory/  ──►  │ taxonomy importer → ObservationStore ◄──┐  │ ◄──► │ Overview · Spider Manager · Sources
   (CSV/JSON/    │                         ▲               │  │      │ Taxonomy · Materials · Market
    XLSX/MD)     │ source registry (YAML seed + API)       │  │      │ Data Explorer · Settings
                 └────────────┬─────────────┬──────────────┼──┘
                              │ jobs table  │              │
                 ┌────────────▼──────┐   ┌──▼──────────────┴──┐
-                │ worker (APScheduler)│ │ crawl process / job │  python -m mip.crawler.run <id>
+                │ worker (APScheduler)│ │ crawl process / job │  python -m emithran.crawler.run <id>
                 │ schedule · dispatch │─►│ Scrapy RegistrySpider│  (+ scrapy-playwright only if render_js)
                 │ recover · alerts    │ │ parsers → pipeline  │
                 └─────────────────────┘ └─────────────────────┘
@@ -24,7 +24,7 @@ database, and serves an 8-screen enterprise dashboard.
 **Docker (recommended)** — from this folder, with `memory/` next to it:
 
 ```bash
-cp .env.example .env            # set MIP_CONTACT_EMAIL and MIP_ADMIN_TOKEN
+cp .env.example .env            # set EMITHRAN_CONTACT_EMAIL and EMITHRAN_ADMIN_TOKEN
 docker compose up -d --build    # db, redis, api (:8000), worker
 docker compose run --rm importer   # import ../memory (≈1–2 min, idempotent by checksum)
 open http://localhost:8000
@@ -34,17 +34,17 @@ open http://localhost:8000
 
 ```bash
 pip install -r requirements-dev.txt
-export MIP_DATABASE_URL=postgresql+psycopg://mip:mip@localhost/mip   # or omit → SQLite in ./var
-export MIP_DATA_ROOT=../memory
+export EMITHRAN_DATABASE_URL=postgresql+psycopg://emithran:emithran@localhost/emithran   # or omit → SQLite in ./var
+export EMITHRAN_DATA_ROOT=../memory
 alembic upgrade head
-python -m mip.cli seed-sources
-python -m mip.cli import-taxonomy
-python -m mip.cli serve &          # UI + API on :8000 (MIP_EMBEDDED_WORKER=true runs the worker in-process)
-python -m mip.cli worker           # scheduler + dispatcher (separate process in production)
-python -m mip.cli crawl frankfurter-fx    # run one source synchronously
+python -m emithran.cli seed-sources
+python -m emithran.cli import-taxonomy
+python -m emithran.cli serve &          # UI + API on :8000 (EMITHRAN_EMBEDDED_WORKER=true runs the worker in-process)
+python -m emithran.cli worker           # scheduler + dispatcher (separate process in production)
+python -m emithran.cli crawl frankfurter-fx    # run one source synchronously
 ```
 
-Offline demo / tests: `MIP_REPLAY_DIR=tests/fixtures/replay` serves real responses captured on
+Offline demo / tests: `EMITHRAN_REPLAY_DIR=tests/fixtures/replay` serves real responses captured on
 2026-10-27 instead of using the network; every resulting record is tagged `replayed`.
 
 ## What the importer found in `memory/`
@@ -69,14 +69,14 @@ Source columns whose names contain them (e.g. `mhrUsdPerHour`) are kept under th
 
 ## Source registry
 
-`mip/registry/sources.yaml` seeds 24 sources. Each has type, scope, licence, commercial-use flag,
+`emithran/registry/sources.yaml` seeds 24 sources. Each has type, scope, licence, commercial-use flag,
 verification status and evidence date. Status meanings:
 
 | status | meaning | can run? |
 |---|---|---|
 | `verified` | live request confirmed URL + format (2026-10-27) | yes |
 | `url_verified` / `documented` | URL or official docs confirmed, not fully exercised | yes (manual first run advised) |
-| `key_required` | exists, needs `MIP_KEY_*` env var | yes, once key is set |
+| `key_required` | exists, needs `EMITHRAN_KEY_*` env var | yes, once key is set |
 | `planned` | candidate, terms/URL unconfirmed | **no** |
 | `blocked_by_terms` | terms forbid crawling/reuse (FRED, MatWeb, NIMS, LME/MCX/Fastmarkets) | **never** |
 
@@ -101,7 +101,7 @@ ISO Open Data; documented: OpenAlex, Crossref, arXiv. Details: `docs/SOURCES.md`
 Generic parsers: `html_table`, `html_css` (CSS/XPath schema), `jsonld`, `csv_table`, `xlsx_table`,
 `pdf_tables`, `rss`, `article` (trafilatura). Source-specific: `frankfurter`, `worldbank_indicator`,
 `worldbank_pinksheet`, `eurostat_jsonstat`, `comtrade`, `openalex`, `crossref`, `iso_deliverables`.
-`llm_extract` is available only with `MIP_LLM_API_KEY`; its records are always `ai_extracted` and never auto-verified.
+`llm_extract` is available only with `EMITHRAN_LLM_API_KEY`; its records are always `ai_extracted` and never auto-verified.
 New sources start `paused`; a source can only be activated once its verification status allows it.
 
 ## Crawling behaviour
@@ -120,12 +120,12 @@ New sources start `paused`; a source can only be activated once its verification
 
 ## Go fetch worker (high-concurrency engine)
 
-`go-fetcher/` is a Go binary (`mip-fetch`) that takes over the *fetching* for sources marked
+`go-fetcher/` is a Go binary (`emithran-fetch`) that takes over the *fetching* for sources marked
 `extraction.fetch_engine: go` (Frankfurter FX, World Bank WDI, Eurostat, UN Comtrade, Manufacturing Dive RSS).
 Parsing, normalization, quality rules and storage stay in Python, so there is one implementation of each.
 
 ```
-worker.dispatch ──► mip-fetch run --job N          (one OS process per job, like the Scrapy engine)
+worker.dispatch ──► emithran-fetch run --job N          (one OS process per job, like the Scrapy engine)
                       GET  /api/fetcher/jobs/N/plan        URLs, politeness, ETag/hash checkpoints
                       fetch: per-host pacing + concurrency cap, conditional GET, retry/backoff/Retry-After,
                              robots.txt (Google semantics), body-hash unchanged detection, cancel/timeout
@@ -136,14 +136,14 @@ worker.dispatch ──► mip-fetch run --job N          (one OS process per job
 
 * **Why Go here:** goroutines make thousands of in-flight requests cheap — the worker runs
   `concurrency × hosts` fetchers (cap 256), each host individually rate-limited, in one small static binary.
-* **Opt-in and safe:** without `MIP_GO_FETCHER_BIN` (or for sources needing JS rendering / sitemaps / link-discovery)
+* **Opt-in and safe:** without `EMITHRAN_GO_FETCHER_BIN` (or for sources needing JS rendering / sitemaps / link-discovery)
   the job transparently runs on Scrapy. Both engines produce identical records (tested against the same recordings).
-* **Control plane** (`/api/fetcher/*`) is protected by `X-Admin-Token` when `MIP_ADMIN_TOKEN` is set — keep it off the public internet.
+* **Control plane** (`/api/fetcher/*`) is protected by `X-Admin-Token` when `EMITHRAN_ADMIN_TOKEN` is set — keep it off the public internet.
 
 ```bash
-cd go-fetcher && go build -o ../var/bin/mip-fetch ./cmd/mip-fetch && go test -race ./...
-export MIP_GO_FETCHER_BIN=$PWD/../var/bin/mip-fetch        # then run the worker as usual
-../var/bin/mip-fetch run --job 42 --api http://127.0.0.1:8000 [--replay-dir ../tests/fixtures/replay]
+cd go-fetcher && go build -o ../var/bin/emithran-fetch ./cmd/emithran-fetch && go test -race ./...
+export EMITHRAN_GO_FETCHER_BIN=$PWD/../var/bin/emithran-fetch        # then run the worker as usual
+../var/bin/emithran-fetch run --job 42 --api http://127.0.0.1:8000 [--replay-dir ../tests/fixtures/replay]
 ```
 
 **What “real time” means here:** these publishers update daily (ECB ~16:00 CET), monthly or annually — nothing upstream is
@@ -194,8 +194,8 @@ developer portal in `../developer-portal`.
 * OpenAPI 3.1: `GET /api/v2/openapi.json`.
 
 ```bash
-export MIP_ADMIN_TOKEN=change-me MIP_SECRET_KEY=$(openssl rand -hex 32)
-python -m mip.cli create-api-key "my notebook"          # prints an emk_… key once
+export EMITHRAN_ADMIN_TOKEN=change-me EMITHRAN_SECRET_KEY=$(openssl rand -hex 32)
+python -m emithran.cli create-api-key "my notebook"          # prints an emk_… key once
 curl -H "Authorization: Bearer emk_…" http://localhost:8000/api/v2/ontologies/manufacturing/objectTypes
 ```
 
@@ -212,4 +212,4 @@ pytest -q        # 21 tests: public API v2 (auth, scopes, rate limit, paging, se
   replayed real responses. Run the worker on a host with network access to collect live data.
 * World Bank Pink Sheet and ISO Open Data parsers are built to the documented layouts but have not
   been run against the live files yet — do a manual first run before scheduling.
-* No user accounts; write operations are protected by a shared `MIP_ADMIN_TOKEN`.
+* No user accounts; write operations are protected by a shared `EMITHRAN_ADMIN_TOKEN`.

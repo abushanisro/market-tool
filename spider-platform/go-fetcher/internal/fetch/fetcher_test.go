@@ -274,7 +274,7 @@ func TestReplayTransport(t *testing.T) {
 	if res.Err != nil || res.Status != 200 || res.Replay["captured_at"] == nil || len(res.Body) == 0 {
 		t.Fatalf("replay hit: %+v", res)
 	}
-	if res.Header.Get("X-Mip-Replay") != "" {
+	if res.Header.Get("X-Emithran-Replay") != "" {
 		t.Fatal("internal replay header must be stripped")
 	}
 	miss := f.Fetch(context.Background(), "https://api.frankfurter.dev/v1/nope", Checkpoint{}, false)

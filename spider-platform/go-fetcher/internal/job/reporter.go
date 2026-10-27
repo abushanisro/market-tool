@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"emithran.com/mip/fetcher/internal/api"
+	"emithran.com/fetcher/internal/api"
 )
 
 // stats are the counters the fetcher owns (the platform counts items itself).

@@ -241,10 +241,10 @@ func (f *Fetcher) fill(res *Result, status int, hdr http.Header, body []byte, cp
 	if status == http.StatusOK && !force && cp.ContentHash != "" && cp.ContentHash == res.Hash {
 		res.Unchanged = true
 	}
-	if raw := hdr.Get("X-Mip-Replay"); raw != "" {
+	if raw := hdr.Get("X-Emithran-Replay"); raw != "" {
 		res.Replay = map[string]any{}
 		_ = json.Unmarshal([]byte(raw), &res.Replay)
-		hdr.Del("X-Mip-Replay")
+		hdr.Del("X-Emithran-Replay")
 	}
 }
 

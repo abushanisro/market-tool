@@ -1,7 +1,7 @@
 """Export the API v2 spec, object-type catalogue and REAL example responses for the developer portal.
 
 Usage (against a database that has the memory/ import):
-    MIP_ADMIN_TOKEN=... python scripts/export_api_docs.py ../developer-portal/content
+    EMITHRAN_ADMIN_TOKEN=... python scripts/export_api_docs.py ../developer-portal/content
 
 Examples are produced by calling the API in-process with a temporary key that is revoked afterwards;
 long arrays are trimmed to 3 items so pages stay readable. Nothing is invented.
@@ -17,10 +17,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from mip.api.main import app  # noqa: E402
-from mip.config import get_settings  # noqa: E402
-from mip.db import session_scope  # noqa: E402
-from mip.models import ApiClient, ApiKey, Dataset, Material  # noqa: E402
+from emithran.api.main import app  # noqa: E402
+from emithran.config import get_settings  # noqa: E402
+from emithran.db import session_scope  # noqa: E402
+from emithran.models import ApiClient, ApiKey, Dataset, Material  # noqa: E402
 
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "content")
 
@@ -38,7 +38,7 @@ def trim(v, depth=0):
 def main():
     admin = get_settings().admin_token
     if not admin:
-        sys.exit("set MIP_ADMIN_TOKEN")
+        sys.exit("set EMITHRAN_ADMIN_TOKEN")
     c = TestClient(app, raise_server_exceptions=False)
     A = {"X-Admin-Token": admin}
     key = c.post("/api/v2/admin/apiKeys", headers=A, json={"name": "docs-example-export", "expiresInDays": 1, "scopes": [

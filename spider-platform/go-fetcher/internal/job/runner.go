@@ -11,8 +11,8 @@ import (
 	"net/url"
 	"time"
 
-	"emithran.com/mip/fetcher/internal/api"
-	"emithran.com/mip/fetcher/internal/fetch"
+	"emithran.com/fetcher/internal/api"
+	"emithran.com/fetcher/internal/fetch"
 )
 
 // Close reasons understood by the platform's finalize() (same vocabulary as the Scrapy engine).
