@@ -19,3 +19,4 @@ pdfplumber==0.11.10
 pyyaml>=6.0
 python-dateutil>=2.9
 python-multipart>=0.0.20         # OAuth2 token endpoint (form encoding)
+pyjwt[crypto]==2.15.1                # Auth0 access-token verification (RS256 via JWKS)

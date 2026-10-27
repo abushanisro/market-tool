@@ -62,6 +62,7 @@ export default function Header({ index }: { index: Entry[] }) {
       <nav className="subnav">
         <Link href="/docs/general/introduction" className={path.startsWith("/docs/general") ? "on" : ""}>Overview</Link>
         <Link href="/docs/ontologies/ontology-objects/basics" className={path.startsWith("/docs") && !path.startsWith("/docs/general") ? "on" : ""}>REST API</Link>
+        <a href="/dashboard/">Dashboard</a>
         <Link href="/console" className={path.startsWith("/console") ? "on" : ""}>Developer Console</Link>
         <span className="ver">Version 2.0</span>
       </nav>

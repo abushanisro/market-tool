@@ -2,16 +2,11 @@ from __future__ import annotations
 
 import datetime as dt
 
-from fastapi import Header, HTTPException
-
-from ..config import get_settings
+from ..auth import admin
 from ..db import get_session  # noqa: F401  (re-export)
 
 
-def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
-    token = get_settings().admin_token
-    if token and x_admin_token != token:
-        raise HTTPException(status_code=401, detail="X-Admin-Token required")
+require_admin = admin  # write access: Auth0 role `admin` (development: optional shared secret); see emithran/auth.py
 
 
 def iso(d):

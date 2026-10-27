@@ -18,9 +18,10 @@ from ...models import (
 )
 from ...normalize.materials import FAMILY_DISPLAY
 from ...taxonomy.categories import FAMILY_LABELS
+from ...auth import user
 from ..deps import iso, require_admin
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", dependencies=[Depends(user)])
 
 
 # ---------------------------------------------------------------- taxonomy

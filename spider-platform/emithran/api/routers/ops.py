@@ -20,9 +20,11 @@ from ...models import (
     Material, Observation, QualityIssue, Source, Standard,
 )
 from ...registry.service import SourceConfig, freshness, register_source, update_source
+from ...auth import Principal, enabled as auth_enabled, principal, user
 from ..deps import iso, require_admin
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", dependencies=[Depends(user)])
+public = APIRouter(prefix="/api")           # no sign-in: the host's health check
 
 
 def source_dict(src: Source, extra: dict | None = None) -> dict[str, Any]:
@@ -50,7 +52,15 @@ def job_dict(j: CrawlJob, src: Source | None = None) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------- overview
-@router.get("/health")
+@router.get("/me")
+def me(p: Principal = Depends(principal)):
+    """The signed-in user's identity and what they may do; the dashboard uses it to hide admin actions."""
+    from ...auth import ADMIN
+
+    return {"sub": p.sub, "admin": ADMIN in p.permissions, "auth": auth_enabled()}
+
+
+@public.get("/health")
 def health(s: Session = Depends(get_session)):
     s.execute(select(1))
     return {"status": "ok", "time": dt.datetime.now(dt.timezone.utc).isoformat()}

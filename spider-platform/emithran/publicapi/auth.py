@@ -19,9 +19,10 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from fastapi import Depends, Request, Response
+from fastapi import Depends, HTTPException, Request, Response
 from sqlalchemy import select
 
+from .. import auth as auth0
 from ..config import get_settings
 from ..db import session_scope
 from ..models import ApiClient, ApiKey, ApiRequestLog, AppSetting
@@ -144,7 +145,7 @@ def _verify_key(key: str) -> Principal:
 
 def authenticate(request: Request) -> Principal:
     admin = get_settings().admin_token
-    if admin and hmac.compare_digest(request.headers.get("x-admin-token", ""), admin):
+    if admin and not auth0.enabled() and hmac.compare_digest(request.headers.get("x-admin-token", ""), admin):
         return Principal("admin", "admin", set(SCOPES), 100_000)
     auth = request.headers.get("authorization", "")
     if not auth:
@@ -157,6 +158,14 @@ def authenticate(request: Request) -> Principal:
         return _verify_token(tok)
     if tok.startswith("emk_"):
         return _verify_key(tok)
+    if auth0.enabled():                      # a signed-in human (Auth0 access token): admins only, for the developer console
+        try:
+            who = auth0.verify(tok)
+        except HTTPException:
+            raise ApiError("UNAUTHORIZED", "InvalidToken", {"reason": "invalid or expired token"}, {"WWW-Authenticate": "Bearer"})
+        if auth0.ADMIN not in who.permissions:
+            raise ApiError("PERMISSION_DENIED", "AdminRequired", {})
+        return Principal("admin", who.sub, set(SCOPES), 100_000)
     raise ApiError("UNAUTHORIZED", "InvalidToken", {"reason": "unrecognised token type"})
 
 

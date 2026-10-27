@@ -11,15 +11,16 @@ import asyncio
 import json
 from typing import Any
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
 
+from ..auth import user
 from ..db import session_scope
 from ..models import AgentFinding, AgentRun, CrawlJob, Document, Observation
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", dependencies=[Depends(user)])
 TICK = 2.0
 
 

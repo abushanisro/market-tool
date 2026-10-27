@@ -27,5 +27,5 @@ COPY tests/fixtures/replay ./tests/fixtures/replay
 RUN useradd -m -u 10001 emithran && mkdir -p /app/var && chown -R emithran /app
 USER emithran
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s CMD curl -fs http://localhost:8000/api/health || exit 1
-CMD ["sh", "-c", "alembic upgrade head && python -m emithran.cli seed-sources && uvicorn emithran.api.main:app --host 0.0.0.0 --port 8000 --proxy-headers"]
+HEALTHCHECK --interval=30s --timeout=5s CMD curl -fs http://localhost:${PORT:-8000}/api/health || exit 1
+CMD ["sh", "-c", "alembic upgrade head && python -m emithran.cli seed-sources && uvicorn emithran.api.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers"]

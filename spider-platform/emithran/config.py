@@ -11,7 +11,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
@@ -54,8 +54,20 @@ class Settings(BaseSettings):
     dispatcher_tick_seconds: int = 5
 
     # API -------------------------------------------------------------------
-    admin_token: str | None = Field(default=None, description="If set, mutating API calls require X-Admin-Token")
+    admin_token: str | None = Field(default=None, description="Machine secret (X-Admin-Token) for /api/fetcher; in development also guards writes")
+    env: str = Field(default="development", description="'production' refuses to start without Auth0 and the machine secret")
+    auth0_domain: str | None = Field(default=None, description="e.g. emithran.us.auth0.com; unset = open API (development only)")
+    auth0_audience: str | None = Field(default=None, description="Auth0 API identifier the access token was issued for")
     cors_origins: list[str] = ["*"]
+
+    @field_validator("database_url")
+    @classmethod
+    def _driver(cls, url: str) -> str:
+        """Hosts (Railway, Heroku, Neon) hand out postgres:// or postgresql://; SQLAlchemy needs the psycopg driver named."""
+        for prefix in ("postgres://", "postgresql://"):
+            if url.startswith(prefix):
+                return "postgresql+psycopg://" + url[len(prefix):]
+        return url
 
     def credential_present(self, env_name: str | None) -> bool:
         return bool(env_name and os.environ.get(env_name))

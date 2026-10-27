@@ -15,11 +15,18 @@ function ago(iso) {
 }
 const dt = (iso) => iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "-";
 
+// Behind the Vercel front door the dashboard lives under /dashboard and every call goes through its authenticated proxy;
+// served directly by the backend (local development) it talks to the same origin.
+const API_BASE = location.pathname.startsWith("/dashboard") ? "/api/emithran" : "";
+const ME = { auth: false, admin: true, sub: "dev" };   // overwritten by /api/me
+async function loadMe() { try { Object.assign(ME, await api("/api/me")); } catch { /* keep the defaults */ } document.body.classList.toggle("viewer", ME.auth && !ME.admin); }
 const ADMIN = { token: (() => { try { return localStorage.getItem("emithran_admin_token") || ""; } catch { return ""; } })() };
 async function api(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
-  if (ADMIN.token) headers["X-Admin-Token"] = ADMIN.token;
-  const res = await fetch(path, { ...opts, headers, body: opts.body && typeof opts.body !== "string" ? JSON.stringify(opts.body) : opts.body });
+  if (ADMIN.token && !API_BASE) headers["X-Admin-Token"] = ADMIN.token;      // development only; signed-in users never send it
+  if (ME.auth && !ME.admin && (opts.method || "GET") !== "GET") { const e = new Error("Admin access required: your account is read-only"); e.status = 403; throw e; }
+  const res = await fetch(API_BASE + path, { ...opts, headers, body: opts.body && typeof opts.body !== "string" ? JSON.stringify(opts.body) : opts.body });
+  if (res.status === 401 && API_BASE) { location.assign("/auth/login?returnTo=" + encodeURIComponent(location.pathname + location.hash)); return new Promise(() => {}); }  // session ended
   if (!res.ok) {
     let msg = res.statusText;
     try { const j = await res.json(); msg = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail); } catch { /* ignore */ }
@@ -157,7 +164,7 @@ async function refreshChrome() {
     LIVE.at = new Date();
     const badge = `<span class="live ${LIVE.on ? "on" : ""}" title="${LIVE.on ? "Receiving live updates" : "Live updates paused - reconnecting"}"><i></i>${LIVE.on ? "Live" : "Offline"}</span>`;
     $("#ticker").innerHTML = `${badge} · Records <b>${nf.format(o.records.observations + o.records.documents)}</b> · Sources <b>${o.sources.active}/${o.sources.total}</b> · Spiders running <b>${o.spiders.running}</b> · Updated <b>${LIVE.at.toLocaleTimeString()}</b>`;
-    $("#sidebar-foot").innerHTML = `<span class="dot"></span>API online · last refresh ${esc(ago(o.last_successful_refresh))}`;
+    $("#sidebar-foot").innerHTML = `<span class="dot"></span>API online · last refresh ${esc(ago(o.last_successful_refresh))}${ME.auth ? ` · ${ME.admin ? "admin" : "viewer"} · <a href="/auth/logout">Sign out</a>` : ""}`;
   } catch (e) { $("#sidebar-foot").innerHTML = `<span class="dot" style="background:#f85149"></span>API unreachable`; }
 }
 
@@ -176,7 +183,7 @@ async function softRefresh() {
 }
 function startLive() {
   if (!window.EventSource || new URLSearchParams(location.search).get("live") === "0") return;   // ?live=0 turns the stream off (screenshots, debugging)
-  const es = new EventSource("/api/stream"); let first = true, t;
+  const es = new EventSource(API_BASE + "/api/stream"); let first = true, t;
   es.onopen = () => { LIVE.on = true; refreshChrome(); };
   es.onerror = () => { LIVE.on = false; refreshChrome(); };           // the browser reconnects on its own
   es.addEventListener("change", () => {

@@ -157,6 +157,10 @@ URL to disable the stream (screenshots, debugging).
 Change `schedule_cron` / `schedule_interval_minutes` per source (UI or `sources.yaml`). Prices from exchanges
 (LME, MCX, …) are not available: their terms forbid scraping, so those sources stay blocked.
 
+## Sign-in and deployment
+
+Auth0 sign-in (roles `admin` / `viewer`), Vercel front door and Railway backend: `docs/DEPLOY.md`. With Auth0 unset the API is open (development only).
+
 ## Manufacturing news and agents
 
 * **Manufacturing News** (`#/news`): live, paged, manufacturing-only headlines tagged to your `memory/` categories, countries and hubs: `docs/NEWS.md`.

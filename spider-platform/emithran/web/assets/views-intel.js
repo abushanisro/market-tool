@@ -400,4 +400,4 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeDra
 $("#menu-btn").onclick = () => $("#sidebar").classList.toggle("open");
 $("#global-search").addEventListener("keydown", (e) => { if (e.key === "Enter") go(`materials?q=${encodeURIComponent(e.target.value)}`); });
 window.addEventListener("hashchange", render);
-render(); refreshChrome(); setInterval(refreshChrome, 15000); startLive();
+loadMe().then(() => { render(); refreshChrome(); setInterval(refreshChrome, 15000); startLive(); });

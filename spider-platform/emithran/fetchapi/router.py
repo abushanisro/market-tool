@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from ..api.deps import require_admin
+from ..auth import machine
 from ..config import get_settings
 from ..crawler.run import _override, finalize
 from ..crawler.spiders.registry_spider import canonicalize, snapshot, start_urls_for
@@ -22,7 +22,7 @@ from ..db import session_scope
 from ..models import CrawlJob, CrawlLog, CrawlUrl
 from .ingest import FETCHER_STATS, PageIn, ingest_pages
 
-router = APIRouter(prefix="/api/fetcher", tags=["fetcher"], dependencies=[Depends(require_admin)])
+router = APIRouter(prefix="/api/fetcher", tags=["fetcher"], dependencies=[Depends(machine)])
 
 ENGINE_KEY = "fetch_engine"  # source.extraction["fetch_engine"] == "go" routes the job to the Go worker
 

@@ -12,9 +12,10 @@ from sqlalchemy.orm import Session
 from ...db import get_session
 from ...models import Category, Country, Document, Source
 from ...news.classify import load_topics
+from ...auth import user
 from ..deps import iso
 
-router = APIRouter(prefix="/api/feed", tags=["feed"])
+router = APIRouter(prefix="/api/feed", tags=["feed"], dependencies=[Depends(user)])
 SOURCE_LABEL = {"gdelt-manufacturing-news": "GDELT", "hackernews-manufacturing": "HN", "manufacturingdive-news": "MFG DIVE",
                 "supplychaindive-news": "SC DIVE", "nist-manufacturing-news": "NIST"}
 

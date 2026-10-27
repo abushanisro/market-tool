@@ -15,9 +15,10 @@ from ...agents.core import SEV_RANK
 from ...agents.llm import ALLOW_HOSTED_KEY, ASSIGN_KEY, LLMGateway
 from ...db import get_session, session_scope
 from ...models import AgentEvent, AgentFinding, AgentRun, AppSetting
+from ...auth import user
 from ..deps import iso, require_admin
 
-router = APIRouter(prefix="/api/agents", tags=["agents"])
+router = APIRouter(prefix="/api/agents", tags=["agents"], dependencies=[Depends(user)])
 STALE_RUN = dt.timedelta(minutes=15)
 
 
